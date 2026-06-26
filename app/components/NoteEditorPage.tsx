@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Save, Share2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock3,
+  FileText,
+  Save,
+  Share2,
+  ShieldCheck,
+  UsersRound,
+} from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
@@ -53,6 +61,12 @@ export default function NoteEditorPage() {
 
   const canEdit = role === "owner" || role === "editor";
   const canShare = role === "owner";
+
+  const wordCount = useMemo(() => {
+    return content.trim().split(/\s+/).filter(Boolean).length;
+  }, [content]);
+
+  const roleLabel = role || "no-access";
 
   useEffect(() => {
     if (authLoading || !user || !token || !id) {
@@ -259,7 +273,7 @@ export default function NoteEditorPage() {
             <p className="mt-3 leading-7">{error}</p>
           </div>
         ) : !note ? (
-          <div className="rounded-[2rem] border border-slate-200 bg-white/80 p-8 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
             <h3 className="text-2xl font-black tracking-tight text-slate-950 dark:text-slate-50">
               Note tidak ditemukan
             </h3>
@@ -271,75 +285,100 @@ export default function NoteEditorPage() {
         ) : (
           <>
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <section className="rounded-[2rem] border border-slate-200 bg-white/80 p-5 shadow-xl shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-black/30 sm:p-7">
-                <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 text-sm font-black text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <ArrowLeft size={18} />
-                    Dashboard
-                  </Link>
+              <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/82 shadow-2xl shadow-slate-200/70 backdrop-blur dark:border-slate-800/80 dark:bg-slate-900/72 dark:shadow-black/30">
+                <div className="border-b border-slate-200/80 bg-white/60 p-5 backdrop-blur dark:border-slate-800 dark:bg-slate-950/20 sm:p-6">
+                  <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                    <Link
+                      href="/"
+                      className="inline-flex w-fit items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700 transition hover:-translate-y-0.5 hover:border-blue-300 dark:border-blue-900/70 dark:bg-blue-950/40 dark:text-blue-300"
+                    >
+                      <ArrowLeft size={17} />
+                      Dashboard
+                    </Link>
 
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black capitalize text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
-                      {role || "no-access"}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-2 text-xs font-black capitalize text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                        <ShieldCheck size={14} />
+                        {roleLabel}
+                      </span>
 
-                    {canEdit && (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:opacity-60 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-                        onClick={saveManually}
-                        disabled={saving}
-                      >
-                        <Save size={17} />
-                        {saving ? "Menyimpan..." : "Simpan"}
-                      </button>
-                    )}
+                      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                        <UsersRound size={14} />
+                        {onlineUsers.length} online
+                      </span>
 
-                    {canShare && (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5"
-                        onClick={() => setShowShareModal(true)}
-                      >
-                        <Share2 size={17} />
-                        Share
-                      </button>
-                    )}
+                      {canEdit && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                          onClick={saveManually}
+                          disabled={saving}
+                        >
+                          <Save size={17} />
+                          {saving ? "Menyimpan..." : "Simpan"}
+                        </button>
+                      )}
+
+                      {canShare && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-600/25 transition hover:-translate-y-0.5"
+                          onClick={() => setShowShareModal(true)}
+                        >
+                          <Share2 size={17} />
+                          Share
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {error && (
+                    <div className="mt-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                      {error}
+                    </div>
+                  )}
                 </div>
 
-                {error && (
-                  <div className="mb-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
-                    {error}
+                <div className="p-5 sm:p-7 lg:p-8">
+                  <input
+                    className="w-full border-none bg-transparent text-4xl font-black tracking-tight text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70 dark:text-slate-50 sm:text-5xl"
+                    value={title}
+                    onChange={handleTitleChange}
+                    disabled={!canEdit}
+                    placeholder="Untitled Note"
+                  />
+
+                  <div className="mt-5 flex flex-wrap gap-3 border-b border-slate-200 pb-5 text-xs font-black text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 dark:bg-slate-800">
+                      <FileText size={14} />
+                      {wordCount} kata
+                    </span>
+
+                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 dark:bg-slate-800">
+                      <Clock3 size={14} />
+                      {new Date(note.updatedAt).toLocaleString("id-ID", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </span>
                   </div>
-                )}
 
-                <input
-                  className="w-full border-none bg-transparent text-4xl font-black tracking-tight text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70 dark:text-slate-50 sm:text-5xl"
-                  value={title}
-                  onChange={handleTitleChange}
-                  disabled={!canEdit}
-                  placeholder="Untitled Note"
-                />
+                  <textarea
+                    className="mt-6 min-h-[560px] w-full resize-y border-none bg-transparent text-base leading-8 text-slate-700 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70 dark:text-slate-200"
+                    value={content}
+                    onChange={handleContentChange}
+                    disabled={!canEdit}
+                    placeholder={
+                      canEdit
+                        ? "Tulis catatan kamu di sini..."
+                        : "Kamu hanya punya akses viewer"
+                    }
+                  />
 
-                <textarea
-                  className="mt-6 min-h-[560px] w-full resize-y border-none bg-transparent text-base leading-8 text-slate-700 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70 dark:text-slate-200"
-                  value={content}
-                  onChange={handleContentChange}
-                  disabled={!canEdit}
-                  placeholder={
-                    canEdit
-                      ? "Tulis catatan kamu di sini..."
-                      : "Kamu hanya punya akses viewer"
-                  }
-                />
-
-                <div className="mt-4 min-h-6 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                  {typingUsers.length > 0 &&
-                    `${typingUsers.map((item) => item.name).join(", ")} sedang mengetik...`}
+                  <div className="mt-4 min-h-6 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    {typingUsers.length > 0 &&
+                      `${typingUsers.map((item) => item.name).join(", ")} sedang mengetik...`}
+                  </div>
                 </div>
               </section>
 

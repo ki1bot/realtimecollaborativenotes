@@ -13,8 +13,8 @@ export default function ThemeToggle({
 
   const className =
     variant === "floating"
-      ? "fixed right-5 top-5 z-30 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-extrabold text-slate-900 shadow-xl backdrop-blur transition hover:-translate-y-0.5 hover:border-blue-400 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100"
-      : "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-extrabold text-slate-900 shadow-lg backdrop-blur transition hover:-translate-y-0.5 hover:border-blue-400 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100";
+      ? "fixed right-5 top-5 z-30 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-sm font-extrabold text-slate-900 shadow-xl shadow-slate-200/60 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-blue-400 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-black/30"
+      : "inline-flex h-11 items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-sm font-extrabold text-slate-900 shadow-lg shadow-slate-200/60 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-blue-400 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-black/30";
 
   return (
     <button
@@ -24,13 +24,15 @@ export default function ThemeToggle({
       title={isDark ? "Aktifkan tema terang" : "Aktifkan tema gelap"}
       className={className}
     >
-      {isDark ? (
-        <Sun className="text-blue-400" size={18} strokeWidth={2.3} />
-      ) : (
-        <Moon className="text-blue-600" size={18} strokeWidth={2.3} />
-      )}
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300">
+        {isDark ? (
+          <Sun size={17} strokeWidth={2.4} />
+        ) : (
+          <Moon size={17} strokeWidth={2.4} />
+        )}
+      </span>
 
-      <span>{isDark ? "Terang" : "Gelap"}</span>
+      <span className="hidden sm:inline">{isDark ? "Terang" : "Gelap"}</span>
     </button>
   );
 }

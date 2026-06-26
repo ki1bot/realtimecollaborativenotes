@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
+import { NotebookPen, Sparkles, Wifi } from "lucide-react";
 import { useAuth } from "@/app/components/AuthProvider";
 import ProfileMenu from "@/app/components/ProfileMenu";
 import ThemeToggle from "@/app/components/ThemeToggle";
@@ -18,29 +19,47 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative isolate min-h-screen overflow-x-hidden bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.18),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(22,163,74,0.10),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.16),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.09),transparent_32%)]" />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_12%,rgba(37,99,235,0.24),transparent_34%),radial-gradient(circle_at_88%_10%,rgba(14,165,233,0.15),transparent_30%),radial-gradient(circle_at_70%_90%,rgba(99,102,241,0.15),transparent_34%)] dark:bg-[radial-gradient(circle_at_12%_12%,rgba(59,130,246,0.18),transparent_34%),radial-gradient(circle_at_88%_10%,rgba(14,165,233,0.10),transparent_30%),radial-gradient(circle_at_70%_90%,rgba(129,140,248,0.12),transparent_34%)]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-64 bg-gradient-to-b from-white/75 to-transparent dark:from-slate-950/80" />
 
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/75 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/70">
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/70 backdrop-blur-2xl dark:border-slate-800/80 dark:bg-slate-950/70">
         <div className="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between px-5 sm:px-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-3 text-lg font-black tracking-tight text-slate-950 dark:text-slate-50"
+            className="group inline-flex min-w-0 items-center gap-3"
           >
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-base font-black text-white shadow-lg shadow-blue-500/25">
-              R
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25 transition group-hover:-translate-y-0.5">
+              <NotebookPen size={22} strokeWidth={2.5} />
             </span>
 
-            <span>Realtime Notes</span>
+            <span className="min-w-0">
+              <span className="block truncate text-lg font-black tracking-tight text-slate-950 dark:text-slate-50">
+                Realtime Notes
+              </span>
+              <span className="hidden text-xs font-bold text-slate-500 dark:text-slate-400 sm:block">
+                Write, share, collaborate
+              </span>
+            </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300 md:inline-flex">
+              <Wifi size={15} />
+              Realtime aktif
+            </div>
+
+            <div className="hidden items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/40 dark:text-blue-300 lg:inline-flex">
+              <Sparkles size={15} />
+              Collaborative workspace
+            </div>
+
             <ThemeToggle />
             <ProfileMenu onLogout={handleLogout} />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+      <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:py-10">
         {children}
       </main>
     </div>

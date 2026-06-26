@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Rifqi | Realtime Collaborative Notes",
   description:
-    "Realtime collaborative notes with Next.js, TypeScript, TailwindCSS, MongoDB, and Socket.IO",
+    "Aplikasi catatan kolaboratif realtime dengan Next.js, TypeScript, MongoDB, dan Socket.IO.",
   icons: {
     icon: [{ url: "/icons/logoKibot.png", type: "image/png" }],
     shortcut: [{ url: "/icons/logoKibot.png", type: "image/png" }],
@@ -36,6 +36,7 @@ export default function RootLayout({
       data-theme="light"
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
     >
       <body className="min-h-screen bg-slate-50 font-sans text-slate-950 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider>
