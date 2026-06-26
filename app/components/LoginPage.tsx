@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
+import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,6 +37,8 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
+      <ThemeToggle variant="floating" />
+
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Login</h1>
         <p>Masuk untuk membuka catatan kolaboratif kamu.</p>

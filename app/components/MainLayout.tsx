@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 import { useAuth } from "@/app/components/AuthProvider";
+import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -22,7 +23,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         </Link>
 
         <div className="navbar-right">
-          <span>{user?.name}</span>
+          <ThemeToggle />
+          <span className="navbar-name">{user?.name}</span>
           <button className="btn btn-secondary" onClick={handleLogout}>
             Logout
           </button>

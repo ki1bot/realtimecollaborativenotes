@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
+import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -37,6 +38,8 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
+      <ThemeToggle variant="floating" />
+
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Register</h1>
         <p>Buat akun untuk mulai menulis catatan realtime.</p>
