@@ -1,5 +1,6 @@
 "use client";
 
+import { Search, Trash2, UserPlus, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { notesApi, usersApi } from "@/app/lib/api";
 import type { Note, Role, UserSummary } from "@/app/types";
@@ -17,16 +18,23 @@ export default function CollaboratorModal({
   const [role, setRole] = useState<Role>("viewer");
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
+      setError("");
+
       if (keyword.trim().length < 2) {
         setUsers([]);
         return;
       }
 
-      const result = await usersApi.searchUsers(keyword);
-      setUsers(result);
+      try {
+        const result = await usersApi.searchUsers(keyword);
+        setUsers(result);
+      } catch {
+        setError("Gagal mencari user.");
+      }
     }, 400);
 
     return () => window.clearTimeout(timer);
@@ -34,6 +42,7 @@ export default function CollaboratorModal({
 
   const addCollaborator = async (userId: string) => {
     setLoading(true);
+    setError("");
 
     try {
       const updatedNote = await notesApi.addCollaborator(note._id, {
@@ -44,6 +53,8 @@ export default function CollaboratorModal({
       onUpdated(updatedNote);
       setKeyword("");
       setUsers([]);
+    } catch {
+      setError("Gagal menambahkan collaborator.");
     } finally {
       setLoading(false);
     }
@@ -51,89 +62,174 @@ export default function CollaboratorModal({
 
   const removeCollaborator = async (userId: string) => {
     setLoading(true);
+    setError("");
 
     try {
       const updatedNote = await notesApi.removeCollaborator(note._id, userId);
       onUpdated(updatedNote);
+    } catch {
+      setError("Gagal menghapus collaborator.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal">
-        <div className="modal-header">
-          <h2>Share Note</h2>
-          <button className="icon-btn" onClick={onClose}>
-            ×
+    <div className="fixed inset-0 z-[9999] grid place-items-center bg-slate-950/70 p-5 backdrop-blur-md">
+      <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-slate-950 dark:text-slate-50">
+              Share Note
+            </h2>
+
+            <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+              Tambahkan user lain sebagai viewer atau editor.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            onClick={onClose}
+            aria-label="Tutup modal"
+          >
+            <X size={20} />
           </button>
         </div>
 
-        <div className="form-group">
-          <label>Cari user</label>
-          <input
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-            placeholder="Cari nama atau email"
-          />
-        </div>
+        {error && (
+          <div className="mb-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+            {error}
+          </div>
+        )}
 
-        <div className="form-group">
-          <label>Role</label>
-          <select
-            value={role}
-            onChange={(event) => setRole(event.target.value as Role)}
-          >
-            <option value="viewer">Viewer</option>
-            <option value="editor">Editor</option>
-          </select>
-        </div>
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_160px]">
+          <div>
+            <label className="mb-2 block text-sm font-black text-slate-800 dark:text-slate-200">
+              Cari user
+            </label>
 
-        <div className="search-result">
-          {users.map((user) => (
-            <div className="search-user" key={user._id}>
-              <div>
-                <strong>{user.name}</strong>
-                <span>{user.email}</span>
-              </div>
+            <div className="relative">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                size={18}
+              />
 
-              <button
-                className="btn btn-primary"
-                disabled={loading}
-                onClick={() => addCollaborator(user._id)}
-              >
-                Tambah
-              </button>
+              <input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="Cari nama atau email"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pl-11 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+              />
             </div>
-          ))}
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-black text-slate-800 dark:text-slate-200">
+              Role
+            </label>
+
+            <select
+              value={role}
+              onChange={(event) => setRole(event.target.value as Role)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+            >
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+            </select>
+          </div>
         </div>
 
-        <h3>Collaborators</h3>
+        {users.length > 0 && (
+          <div className="mt-5 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-950/50">
+            <div className="grid gap-2">
+              {users.map((user) => (
+                <div
+                  className="flex items-center justify-between gap-4 rounded-2xl bg-white p-3 dark:bg-slate-900"
+                  key={user._id}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-black text-white">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
 
-        <div className="collaborator-list">
-          {note.collaborators.map((item) => (
-            <div className="collaborator-item" key={item.user._id}>
-              <div>
-                <strong>{item.user.name}</strong>
-                <span>{item.user.email}</span>
-              </div>
+                    <div className="min-w-0">
+                      <strong className="block truncate text-sm font-black text-slate-950 dark:text-slate-50">
+                        {user.name}
+                      </strong>
 
-              <div className="collaborator-actions">
-                <span className="badge">{item.role}</span>
+                      <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                        {user.email}
+                      </span>
+                    </div>
+                  </div>
 
-                {item.role !== "owner" && (
                   <button
-                    className="btn btn-danger"
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 px-4 py-2 text-xs font-black text-white shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 disabled:opacity-60"
                     disabled={loading}
-                    onClick={() => removeCollaborator(item.user._id)}
+                    onClick={() => addCollaborator(user._id)}
                   >
-                    Hapus
+                    <UserPlus size={16} />
+                    Tambah
                   </button>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+
+        <div className="mt-7">
+          <div className="mb-3 flex items-center gap-2">
+            <Users size={18} className="text-blue-600 dark:text-blue-400" />
+            <h3 className="text-lg font-black tracking-tight text-slate-950 dark:text-slate-50">
+              Collaborators
+            </h3>
+          </div>
+
+          <div className="grid max-h-[320px] gap-3 overflow-y-auto pr-1">
+            {note.collaborators.map((item) => (
+              <div
+                className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/50"
+                key={item.user._id}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-sm font-black text-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    {item.user.name.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="min-w-0">
+                    <strong className="block truncate text-sm font-black text-slate-950 dark:text-slate-50">
+                      {item.user.name}
+                    </strong>
+
+                    <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                      {item.user.email}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black capitalize text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
+                    {item.role}
+                  </span>
+
+                  {item.role !== "owner" && (
+                    <button
+                      type="button"
+                      className="grid h-9 w-9 place-items-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-60 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/70"
+                      disabled={loading}
+                      onClick={() => removeCollaborator(item.user._id)}
+                      aria-label="Hapus collaborator"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

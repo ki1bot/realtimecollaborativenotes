@@ -24,9 +24,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             href="/"
             className="inline-flex items-center gap-3 text-lg font-black tracking-tight text-slate-950 dark:text-slate-50"
           >
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-base font-black text-white shadow-lg shadow-blue-500/25">
-              R
-            </span>
             <span>Realtime Notes</span>
           </Link>
 

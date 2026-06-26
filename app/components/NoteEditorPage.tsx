@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowLeft, Share2, Save } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
@@ -29,6 +30,7 @@ export default function NoteEditorPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
   const titleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -163,7 +165,7 @@ export default function NoteEditorPage() {
     });
 
     socket.on("error_message", (message) => {
-      window.alert(message);
+      setError(message);
     });
 
     return () => {
@@ -220,11 +222,16 @@ export default function NoteEditorPage() {
       return;
     }
 
+    setSaving(true);
+    setError("");
+
     try {
       const updatedNote = await notesApi.updateNote(id, { title, content });
       setNote(updatedNote);
     } catch {
       setError("Gagal menyimpan note.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -234,60 +241,92 @@ export default function NoteEditorPage() {
         {loading ? (
           <Loading />
         ) : !id ? (
-          <div className="empty-state">
-            <h3>ID note tidak ditemukan</h3>
-            <p>
+          <div className="rounded-[2rem] border border-red-300 bg-red-50 p-8 text-red-600 shadow-lg dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+            <h3 className="text-2xl font-black tracking-tight">
+              ID note tidak ditemukan
+            </h3>
+
+            <p className="mt-3 leading-7">
               Halaman ini harus dibuka dengan format /?view=note&id=ID_NOTE.
             </p>
           </div>
-        ) : error ? (
-          <div className="alert">{error}</div>
+        ) : error && !note ? (
+          <div className="rounded-[2rem] border border-red-300 bg-red-50 p-8 text-red-600 shadow-lg dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+            <h3 className="text-2xl font-black tracking-tight">
+              Gagal membuka note
+            </h3>
+
+            <p className="mt-3 leading-7">{error}</p>
+          </div>
         ) : !note ? (
-          <div className="empty-state">
-            <h3>Note tidak ditemukan</h3>
-            <p>Note mungkin sudah dihapus atau kamu tidak punya akses.</p>
+          <div className="rounded-[2rem] border border-slate-200 bg-white/80 p-8 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <h3 className="text-2xl font-black tracking-tight text-slate-950 dark:text-slate-50">
+              Note tidak ditemukan
+            </h3>
+
+            <p className="mt-3 leading-7 text-slate-500 dark:text-slate-400">
+              Note mungkin sudah dihapus atau kamu tidak punya akses.
+            </p>
           </div>
         ) : (
           <>
-            <div className="editor-layout">
-              <section className="editor-main">
-                <div className="editor-topbar">
-                  <Link href="/" className="back-link">
-                    ← Dashboard
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <section className="rounded-[2rem] border border-slate-200 bg-white/80 p-5 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 sm:p-7">
+                <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                  <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-sm font-black text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    <ArrowLeft size={18} />
+                    Dashboard
                   </Link>
 
-                  <div className="editor-actions">
-                    <span className="badge">{role}</span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black capitalize text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
+                      {role || "no-access"}
+                    </span>
 
                     {canEdit && (
                       <button
-                        className="btn btn-secondary"
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:opacity-60 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                         onClick={saveManually}
+                        disabled={saving}
                       >
-                        Simpan
+                        <Save size={17} />
+                        {saving ? "Menyimpan..." : "Simpan"}
                       </button>
                     )}
 
                     {canShare && (
                       <button
-                        className="btn btn-primary"
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5"
                         onClick={() => setShowShareModal(true)}
                       >
+                        <Share2 size={17} />
                         Share
                       </button>
                     )}
                   </div>
                 </div>
 
+                {error && (
+                  <div className="mb-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                    {error}
+                  </div>
+                )}
+
                 <input
-                  className="editor-title"
+                  className="w-full border-none bg-transparent text-4xl font-black tracking-tight text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70 dark:text-slate-50 sm:text-5xl"
                   value={title}
                   onChange={handleTitleChange}
                   disabled={!canEdit}
+                  placeholder="Untitled Note"
                 />
 
                 <textarea
-                  className="editor-textarea"
+                  className="mt-6 min-h-[560px] w-full resize-y border-none bg-transparent text-base leading-8 text-slate-700 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70 dark:text-slate-200"
                   value={content}
                   onChange={handleContentChange}
                   disabled={!canEdit}
@@ -298,13 +337,13 @@ export default function NoteEditorPage() {
                   }
                 />
 
-                <div className="typing-status">
+                <div className="mt-4 min-h-6 text-sm font-semibold text-slate-500 dark:text-slate-400">
                   {typingUsers.length > 0 &&
                     `${typingUsers.map((item) => item.name).join(", ")} sedang mengetik...`}
                 </div>
               </section>
 
-              <aside className="editor-sidebar">
+              <aside>
                 <PresencePanel users={onlineUsers} activities={activities} />
               </aside>
             </div>
