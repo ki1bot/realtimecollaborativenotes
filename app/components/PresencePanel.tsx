@@ -11,7 +11,7 @@ export default function PresencePanel({
 }) {
   return (
     <div className="grid gap-5">
-      <section className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+      <section className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 shadow-lg shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-black/30">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-lg font-black tracking-tight text-slate-950 dark:text-slate-50">
             Online
@@ -52,7 +52,7 @@ export default function PresencePanel({
         )}
       </section>
 
-      <section className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+      <section className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 shadow-lg shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-black/30">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-lg font-black tracking-tight text-slate-950 dark:text-slate-50">
             Activity

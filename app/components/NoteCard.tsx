@@ -11,7 +11,7 @@ export default function NoteCard({
   onDelete: (id: string) => void;
 }) {
   return (
-    <article className="group flex min-h-52 flex-col justify-between rounded-[1.75rem] border border-slate-200 bg-white/80 p-6 shadow-lg backdrop-blur transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900/70">
+    <article className="group flex min-h-52 flex-col justify-between rounded-[1.75rem] border border-slate-200 bg-white/80 p-6 shadow-lg shadow-slate-200/60 backdrop-blur transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-black/30">
       <div>
         <Link
           href={`/?view=note&id=${note._id}`}

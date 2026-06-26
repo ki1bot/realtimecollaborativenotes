@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Share2, Save } from "lucide-react";
+import { ArrowLeft, Save, Share2 } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
@@ -271,7 +271,7 @@ export default function NoteEditorPage() {
         ) : (
           <>
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <section className="rounded-[2rem] border border-slate-200 bg-white/80 p-5 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 sm:p-7">
+              <section className="rounded-[2rem] border border-slate-200 bg-white/80 p-5 shadow-xl shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-black/30 sm:p-7">
                 <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
                   <Link
                     href="/"

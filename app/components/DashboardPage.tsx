@@ -88,7 +88,7 @@ export default function DashboardPage() {
           <Loading />
         ) : (
           <>
-            <section className="mb-7 rounded-[2rem] border border-slate-200 bg-white/80 p-7 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <section className="mb-7 rounded-[2rem] border border-slate-200 bg-white/80 p-7 shadow-xl shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-black/30">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h1 className="text-4xl font-black tracking-tight text-slate-950 dark:text-slate-50">

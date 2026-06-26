@@ -20,6 +20,9 @@ export default function CollaboratorModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const inputClass =
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100";
+
   useEffect(() => {
     const timer = window.setTimeout(async () => {
       setError("");
@@ -120,7 +123,7 @@ export default function CollaboratorModal({
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
                 placeholder="Cari nama atau email"
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pl-11 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                className={`${inputClass} pl-11`}
               />
             </div>
           </div>
@@ -133,7 +136,7 @@ export default function CollaboratorModal({
             <select
               value={role}
               onChange={(event) => setRole(event.target.value as Role)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+              className={inputClass}
             >
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
@@ -183,6 +186,7 @@ export default function CollaboratorModal({
         <div className="mt-7">
           <div className="mb-3 flex items-center gap-2">
             <Users size={18} className="text-blue-600 dark:text-blue-400" />
+
             <h3 className="text-lg font-black tracking-tight text-slate-950 dark:text-slate-50">
               Collaborators
             </h3>

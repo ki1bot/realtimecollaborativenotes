@@ -47,7 +47,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+    <div className="relative isolate grid min-h-screen place-items-center overflow-hidden bg-slate-50 px-5 py-10 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.26),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(22,163,74,0.16),transparent_35%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.18),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.10),transparent_35%)]" />
+
       <ThemeToggle variant="floating" />
 
       <form
