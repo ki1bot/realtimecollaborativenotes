@@ -18,6 +18,26 @@ export const metadata: Metadata = {
   title: "Rifqi | Realtime Collaborative Notes",
   description:
     "Realtime collaborative notes with Next.js, TypeScript, TailwindCSS, MongoDB, and Socket.IO",
+  icons: {
+    icon: [
+      {
+        url: "/icons/logoKibot.png",
+        type: "image/png",
+      },
+    ],
+    shortcut: [
+      {
+        url: "/icons/logoKibot.png",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/icons/logoKibot.png",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

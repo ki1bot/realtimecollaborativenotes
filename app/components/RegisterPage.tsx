@@ -1,12 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
 import ThemeToggle from "@/app/components/ThemeToggle";
-import logoKibot from "@/app/assets/icons/logoKibot.png";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -57,20 +55,8 @@ export default function RegisterPage() {
       <ThemeToggle variant="floating" />
 
       <form className="auth-card" onSubmit={handleSubmit}>
-        <div className="auth-brand">
-          <Image
-            src={logoKibot}
-            alt="Kibot Logo"
-            width={42}
-            height={42}
-            className="auth-logo"
-            priority
-          />
-          <div>
-            <h1>Register</h1>
-            <p>Buat akun untuk mulai menulis catatan realtime.</p>
-          </div>
-        </div>
+        <h1>Register</h1>
+        <p>Buat akun untuk mulai menulis catatan realtime.</p>
 
         {error && <div className="alert">{error}</div>}
 

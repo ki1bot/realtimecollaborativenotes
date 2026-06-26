@@ -287,28 +287,6 @@ select:disabled {
   color: var(--primary);
 }
 
-.brand-logo {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(37, 99, 235, 0.22));
-}
-
-.auth-brand {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-.auth-logo {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  flex: 0 0 auto;
-  filter: drop-shadow(0 6px 14px rgba(37, 99, 235, 0.22));
-}
-
 .auth-brand h1 {
   margin: 0 0 8px;
   font-size: 28px;
