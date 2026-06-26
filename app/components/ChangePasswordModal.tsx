@@ -10,7 +10,8 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { authApi } from "@/app/lib/api";
 
 export default function ChangePasswordModal({
@@ -18,6 +19,7 @@ export default function ChangePasswordModal({
 }: {
   onClose: () => void;
 }) {
+  const [mounted, setMounted] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,6 +29,26 @@ export default function ChangePasswordModal({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
 
   const inputClass =
     "w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3.5 pr-12 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-950";
@@ -75,24 +97,28 @@ export default function ChangePasswordModal({
     }
   };
 
-  return (
+  if (!mounted) {
+    return null;
+  }
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[9999] grid place-items-center overflow-y-auto bg-slate-950/75 px-4 py-8 backdrop-blur-md"
+      className="fixed inset-0 z-[99999] flex min-h-dvh items-center justify-center overflow-y-auto bg-slate-950/75 px-4 py-6 backdrop-blur-md"
       onMouseDown={onClose}
     >
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-black/30 backdrop-blur-2xl dark:border-slate-800/90 dark:bg-slate-900/95"
+        className="relative my-auto w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-black/30 backdrop-blur-2xl dark:border-slate-800/90 dark:bg-slate-900/95"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-blue-500/15 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-blue-500/15 to-transparent" />
         <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-indigo-500/15 blur-3xl" />
 
-        <div className="relative border-b border-slate-200/80 px-6 py-6 dark:border-slate-800 sm:px-7">
+        <div className="relative border-b border-slate-200/80 px-6 py-5 dark:border-slate-800 sm:px-7">
           <div className="flex items-start justify-between gap-5">
             <div className="flex min-w-0 gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-3xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25">
-                <KeyRound size={27} />
+              <div className="grid h-13 w-13 shrink-0 place-items-center rounded-3xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25">
+                <KeyRound size={26} />
               </div>
 
               <div className="min-w-0">
@@ -117,7 +143,7 @@ export default function ChangePasswordModal({
           </div>
         </div>
 
-        <form className="relative px-6 py-6 sm:px-7" onSubmit={handleSubmit}>
+        <form className="relative px-6 py-5 sm:px-7" onSubmit={handleSubmit}>
           <div className="mb-5 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50/80 px-4 py-3 text-sm font-bold leading-6 text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/35 dark:text-blue-300">
             <ShieldCheck size={18} className="mt-0.5 shrink-0" />
             <span>
@@ -168,7 +194,7 @@ export default function ChangePasswordModal({
             </div>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-4">
             <label className={labelClass}>Password Baru</label>
 
             <div className="relative">
@@ -196,7 +222,7 @@ export default function ChangePasswordModal({
             </div>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-4">
             <label className={labelClass}>Konfirmasi Password Baru</label>
 
             <div className="relative">
@@ -224,7 +250,7 @@ export default function ChangePasswordModal({
             </div>
           </div>
 
-          <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 shadow-lg shadow-slate-200/50 transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100 dark:shadow-black/20 dark:hover:bg-slate-900"
@@ -243,6 +269,7 @@ export default function ChangePasswordModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
