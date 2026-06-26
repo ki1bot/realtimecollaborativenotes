@@ -1,5 +1,6 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/app/components/ThemeProvider";
 
 export default function ThemeToggle({
@@ -8,6 +9,7 @@ export default function ThemeToggle({
   variant?: "default" | "floating";
 }) {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <button
@@ -16,10 +18,15 @@ export default function ThemeToggle({
         variant === "floating" ? "theme-toggle theme-floating" : "theme-toggle"
       }
       onClick={toggleTheme}
-      aria-label="Ganti tema"
+      aria-label={isDark ? "Aktifkan tema terang" : "Aktifkan tema gelap"}
+      title={isDark ? "Aktifkan tema terang" : "Aktifkan tema gelap"}
     >
-      <span>{theme === "dark" ? "☀️" : "🌙"}</span>
-      <span>{theme === "dark" ? "Terang" : "Gelap"}</span>
+      {isDark ? (
+        <Sun className="theme-icon" size={18} strokeWidth={2.2} />
+      ) : (
+        <Moon className="theme-icon" size={18} strokeWidth={2.2} />
+      )}
+      <span>{isDark ? "Terang" : "Gelap"}</span>
     </button>
   );
 }

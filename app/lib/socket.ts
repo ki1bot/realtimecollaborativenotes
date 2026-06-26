@@ -10,7 +10,7 @@ export const connectSocket = (token: string): AppSocket => {
     return socket;
   }
 
-  socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || undefined, {
+  socket = io({
     auth: { token },
   });
 

@@ -107,12 +107,17 @@ select:disabled {
   transition:
     transform 0.15s ease,
     background 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .theme-toggle:hover {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+}
+
+.theme-icon {
+  color: var(--primary);
 }
 
 .theme-floating {
@@ -274,9 +279,46 @@ select:disabled {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 20px;
   font-weight: 900;
   color: var(--primary);
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(37, 99, 235, 0.22));
+}
+
+.auth-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.auth-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 6px 14px rgba(37, 99, 235, 0.22));
+}
+
+.auth-brand h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.auth-brand p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .navbar-right {

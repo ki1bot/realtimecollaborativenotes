@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 import { useAuth } from "@/app/components/AuthProvider";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import logoKibot from "@/app/assets/icons/logoKibot.png";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -19,7 +21,15 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <header className="navbar">
         <Link href="/" className="brand">
-          Realtime Notes
+          <Image
+            src={logoKibot}
+            alt="Kibot Logo"
+            width={34}
+            height={34}
+            className="brand-logo"
+            priority
+          />
+          <span>Realtime Notes</span>
         </Link>
 
         <div className="navbar-right">
