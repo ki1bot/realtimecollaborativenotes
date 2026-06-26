@@ -20,7 +20,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <header className="navbar">
         <Link href="/" className="brand">
-          Realtime Notes
+          <span className="brand-mark">R</span>
+          <span>Realtime Notes</span>
         </Link>
 
         <div className="navbar-right">

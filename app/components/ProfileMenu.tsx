@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound, LogOut, UserCircle } from "lucide-react";
+import { KeyRound, LogOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/components/AuthProvider";
 import ChangePasswordModal from "@/app/components/ChangePasswordModal";
@@ -37,9 +37,10 @@ export default function ProfileMenu({ onLogout }: { onLogout: () => void }) {
           type="button"
           className="profile-button"
           onClick={() => setOpen((current) => !current)}
+          aria-label="Buka menu akun"
         >
           <span className="profile-avatar">{initial}</span>
-          <span className="profile-name">{user?.name || "Profile"}</span>
+          <span className="profile-name">{user?.name || "Akun"}</span>
         </button>
 
         {open && (
@@ -52,11 +53,6 @@ export default function ProfileMenu({ onLogout }: { onLogout: () => void }) {
                 <span>{user?.email}</span>
               </div>
             </div>
-
-            <button type="button" className="profile-item">
-              <UserCircle size={18} />
-              <span>Profile</span>
-            </button>
 
             <button
               type="button"

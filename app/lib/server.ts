@@ -3,11 +3,11 @@ import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import { connectDatabase } from "./app/lib/db";
-import { canEditNote, canViewNote } from "./app/lib/permissions";
-import ActivityLog from "./app/models/ActivityLog";
-import Note from "./app/models/Note";
-import User from "./app/models/User";
+import { connectDatabase } from "./db";
+import { canEditNote, canViewNote } from "./permissions";
+import ActivityLog from "../models/ActivityLog";
+import Note from "../models/Note";
+import User from "../models/User";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
