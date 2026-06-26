@@ -17,20 +17,29 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="app-shell">
-      <header className="navbar">
-        <Link href="/" className="brand">
-          <span className="brand-mark">R</span>
-          <span>Realtime Notes</span>
-        </Link>
+    <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/75 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/70">
+        <div className="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between px-5 sm:px-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 text-lg font-black tracking-tight text-slate-950 dark:text-slate-50"
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-base font-black text-white shadow-lg shadow-blue-500/25">
+              R
+            </span>
+            <span>Realtime Notes</span>
+          </Link>
 
-        <div className="navbar-right">
-          <ThemeToggle />
-          <ProfileMenu onLogout={handleLogout} />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <ProfileMenu onLogout={handleLogout} />
+          </div>
         </div>
       </header>
 
-      <main className="main-content">{children}</main>
+      <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+        {children}
+      </main>
     </div>
   );
 }

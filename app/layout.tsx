@@ -19,24 +19,9 @@ export const metadata: Metadata = {
   description:
     "Realtime collaborative notes with Next.js, TypeScript, TailwindCSS, MongoDB, and Socket.IO",
   icons: {
-    icon: [
-      {
-        url: "/icons/logoKibot.png",
-        type: "image/png",
-      },
-    ],
-    shortcut: [
-      {
-        url: "/icons/logoKibot.png",
-        type: "image/png",
-      },
-    ],
-    apple: [
-      {
-        url: "/icons/logoKibot.png",
-        type: "image/png",
-      },
-    ],
+    icon: [{ url: "/icons/logoKibot.png", type: "image/png" }],
+    shortcut: [{ url: "/icons/logoKibot.png", type: "image/png" }],
+    apple: [{ url: "/icons/logoKibot.png", type: "image/png" }],
   },
 };
 
@@ -52,7 +37,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
+      <body className="min-h-screen bg-slate-50 text-slate-950 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
