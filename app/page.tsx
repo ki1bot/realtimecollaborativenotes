@@ -1,7 +1,11 @@
-import React from "react";
+import { Suspense } from "react";
+import AppRouter from "@/app/components/AppRouter";
+import Loading from "@/app/components/Loading";
 
-function page() {
-  return <div>Rifqi</div>;
+export default function Page() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <AppRouter />
+    </Suspense>
+  );
 }
-
-export default page;
