@@ -353,6 +353,46 @@ export async function PATCH(request: NextRequest) {
     const action = request.nextUrl.searchParams.get("action");
     const body = await request.json();
 
+    if (action === "change-password") {
+      const authUser = await getAuthUser(request);
+      const currentPassword = body.currentPassword;
+      const newPassword = body.newPassword;
+
+      if (!currentPassword || !newPassword) {
+        return jsonError("Password lama dan password baru wajib diisi", 400);
+      }
+
+      if (newPassword.length < 6) {
+        return jsonError("Password baru minimal 6 karakter", 400);
+      }
+
+      if (currentPassword === newPassword) {
+        return jsonError(
+          "Password baru tidak boleh sama dengan password lama",
+          400,
+        );
+      }
+
+      const user = await User.findById(authUser._id).select("+password");
+
+      if (!user) {
+        return jsonError("User tidak ditemukan", 404);
+      }
+
+      const validPassword = await user.comparePassword(currentPassword);
+
+      if (!validPassword) {
+        return jsonError("Password lama salah", 401);
+      }
+
+      user.password = newPassword;
+      await user.save();
+
+      return NextResponse.json({
+        message: "Password berhasil diubah",
+      });
+    }
+
     if (action === "note") {
       const user = await getAuthUser(request);
       const id = getId(request);

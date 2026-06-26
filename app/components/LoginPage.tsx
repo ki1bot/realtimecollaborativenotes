@@ -1,5 +1,7 @@
 "use client";
 
+import axios from "axios";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +13,7 @@ export default function LoginPage() {
   const { login, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,21 +32,11 @@ export default function LoginPage() {
       await login({ email, password });
       router.replace("/");
     } catch (err: unknown) {
-      const message =
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof err.response === "object" &&
-        err.response !== null &&
-        "data" in err.response &&
-        typeof err.response.data === "object" &&
-        err.response.data !== null &&
-        "message" in err.response.data &&
-        typeof err.response.data.message === "string"
-          ? err.response.data.message
-          : "Login gagal";
-
-      setError(message);
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Login gagal");
+      } else {
+        setError("Login gagal");
+      }
     } finally {
       setLoading(false);
     }
@@ -71,12 +64,26 @@ export default function LoginPage() {
 
         <div className="form-group">
           <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={
+                showPassword ? "Sembunyikan password" : "Tampilkan password"
+              }
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
 
         <button className="btn btn-primary btn-full" disabled={loading}>

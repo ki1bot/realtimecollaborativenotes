@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 import { useAuth } from "@/app/components/AuthProvider";
+import ProfileMenu from "@/app/components/ProfileMenu";
 import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -24,10 +25,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
         <div className="navbar-right">
           <ThemeToggle />
-          <span className="navbar-name">{user?.name}</span>
-          <button className="btn btn-secondary" onClick={handleLogout}>
-            Logout
-          </button>
+          <ProfileMenu onLogout={handleLogout} />
         </div>
       </header>
 

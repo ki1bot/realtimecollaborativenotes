@@ -64,6 +64,17 @@ export const authApi = {
 
     return response.data;
   },
+
+  async changePassword(payload: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> {
+    const response = await api.patch<{ message: string }>("", payload, {
+      params: { action: "change-password" },
+    });
+
+    return response.data;
+  },
 };
 
 export const notesApi = {
