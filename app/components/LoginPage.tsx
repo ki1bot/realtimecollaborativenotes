@@ -17,6 +17,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const inputClass =
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100";
+
   useEffect(() => {
     if (!authLoading && user) {
       router.replace("/");
@@ -43,39 +46,56 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-page">
+    <div className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
       <ThemeToggle variant="floating" />
 
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Login</h1>
-        <p>Masuk untuk membuka catatan kolaboratif kamu.</p>
+      <form
+        className="w-full max-w-md rounded-[2rem] border border-slate-200 bg-white/85 p-8 shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/80"
+        onSubmit={handleSubmit}
+      >
+        <h1 className="text-4xl font-black tracking-tight">Login</h1>
 
-        {error && <div className="alert">{error}</div>}
+        <p className="mt-3 leading-7 text-slate-500 dark:text-slate-400">
+          Masuk untuk membuka catatan kolaboratif kamu.
+        </p>
 
-        <div className="form-group">
-          <label>Email</label>
+        {error && (
+          <div className="mt-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6">
+          <label className="mb-2 block text-sm font-black text-slate-800 dark:text-slate-200">
+            Email
+          </label>
+
           <input
             type="email"
             value={email}
+            className={inputClass}
             onChange={(event) => setEmail(event.target.value)}
             required
           />
         </div>
 
-        <div className="form-group">
-          <label>Password</label>
+        <div className="mt-4">
+          <label className="mb-2 block text-sm font-black text-slate-800 dark:text-slate-200">
+            Password
+          </label>
 
-          <div className="password-field">
+          <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               value={password}
+              className={`${inputClass} pr-12`}
               onChange={(event) => setPassword(event.target.value)}
               required
             />
 
             <button
               type="button"
-              className="password-toggle"
+              className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
               onClick={() => setShowPassword((current) => !current)}
               aria-label={
                 showPassword ? "Sembunyikan password" : "Tampilkan password"
@@ -86,12 +106,21 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <button className="btn btn-primary btn-full" disabled={loading}>
+        <button
+          className="mt-6 w-full rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 disabled:opacity-60"
+          disabled={loading}
+        >
           {loading ? "Memproses..." : "Login"}
         </button>
 
-        <p className="auth-switch">
-          Belum punya akun? <Link href="/?view=register">Register</Link>
+        <p className="mt-5 text-center text-sm text-slate-500 dark:text-slate-400">
+          Belum punya akun?{" "}
+          <Link
+            href="/?view=register"
+            className="font-black text-blue-600 dark:text-blue-400"
+          >
+            Register
+          </Link>
         </p>
       </form>
     </div>

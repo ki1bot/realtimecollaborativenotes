@@ -94,6 +94,7 @@ export default function DashboardPage() {
                   <h1 className="text-4xl font-black tracking-tight text-slate-950 dark:text-slate-50">
                     My Notes
                   </h1>
+
                   <p className="mt-3 max-w-2xl leading-7 text-slate-500 dark:text-slate-400">
                     Kelola catatan pribadi dan catatan yang dibagikan ke kamu.
                   </p>

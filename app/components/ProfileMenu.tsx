@@ -42,6 +42,7 @@ export default function ProfileMenu({ onLogout }: { onLogout: () => void }) {
           <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-black text-white">
             {initial}
           </span>
+
           <span className="max-w-32 truncate">{user?.name || "Akun"}</span>
         </button>
 
@@ -56,6 +57,7 @@ export default function ProfileMenu({ onLogout }: { onLogout: () => void }) {
                 <strong className="block truncate text-sm font-black text-slate-950 dark:text-slate-50">
                   {user?.name}
                 </strong>
+
                 <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
                   {user?.email}
                 </span>

@@ -20,6 +20,12 @@ export default function ChangePasswordModal({
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const inputClass =
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-12 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100";
+
+  const eyeButtonClass =
+    "absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40 dark:hover:text-blue-300";
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
@@ -57,12 +63,6 @@ export default function ChangePasswordModal({
       setLoading(false);
     }
   };
-
-  const passwordInputClass =
-    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-12 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100";
-
-  const eyeButtonClass =
-    "absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40 dark:hover:text-blue-300";
 
   return (
     <div className="fixed inset-0 z-[9999] grid place-items-center bg-slate-950/70 p-5 backdrop-blur-md">
@@ -104,7 +104,7 @@ export default function ChangePasswordModal({
                 type={showCurrentPassword ? "text" : "password"}
                 value={currentPassword}
                 onChange={(event) => setCurrentPassword(event.target.value)}
-                className={passwordInputClass}
+                className={inputClass}
                 required
               />
 
@@ -128,7 +128,7 @@ export default function ChangePasswordModal({
                 type={showNewPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
-                className={passwordInputClass}
+                className={inputClass}
                 required
               />
 
@@ -152,7 +152,7 @@ export default function ChangePasswordModal({
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
-                className={passwordInputClass}
+                className={inputClass}
                 required
               />
 
