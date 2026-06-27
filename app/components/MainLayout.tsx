@@ -43,16 +43,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300 md:inline-flex">
-              <Wifi size={15} />
-              Realtime aktif
-            </div>
-
-            <div className="hidden items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/40 dark:text-blue-300 lg:inline-flex">
-              <Sparkles size={15} />
-              Collaborative workspace
-            </div>
-
             <ThemeToggle />
             <ProfileMenu onLogout={handleLogout} />
           </div>
