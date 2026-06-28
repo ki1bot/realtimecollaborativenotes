@@ -1,4 +1,4 @@
-import dns from "node:dns";
+import * as dns from "node:dns";
 import mongoose from "mongoose";
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
@@ -9,42 +9,30 @@ type MongooseCache = {
   promise: Promise<typeof mongoose> | null;
 };
 
-const globalForMongoose = global as typeof globalThis & {
-  mongooseCache?: MongooseCache;
-};
-
-if (!globalForMongoose.mongooseCache) {
-  globalForMongoose.mongooseCache = {
-    conn: null,
-    promise: null,
-  };
+declare global {
+  var mongooseCache: MongooseCache | undefined;
 }
 
-export const connectDatabase = async () => {
-  const cache = globalForMongoose.mongooseCache!;
+const cache: MongooseCache = globalThis.mongooseCache ?? {
+  conn: null,
+  promise: null,
+};
 
+globalThis.mongooseCache = cache;
+
+export const connectDatabase = async () => {
   if (cache.conn) {
     return cache.conn;
   }
 
-  const mongoUri = process.env.MONGODB_URI;
+  const mongoUri = process.env.MONGODB_URI?.trim();
 
   if (!mongoUri) {
     throw new Error("MONGODB_URI belum diisi");
   }
 
-  if (mongoUri.includes("USERNAME") || mongoUri.includes("PASSWORD")) {
-    throw new Error("MONGODB_URI masih memakai placeholder username/password");
-  }
-
-  if (mongoUri.includes("CLUSTER.mongodb.net")) {
-    throw new Error(
-      "MONGODB_URI masih memakai placeholder CLUSTER.mongodb.net",
-    );
-  }
-
   if (!cache.promise) {
-    cache.promise = mongoose.connect(mongoUri.trim(), {
+    cache.promise = mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 30000,
       bufferCommands: false,
     });
