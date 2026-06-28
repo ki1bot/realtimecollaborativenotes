@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
-import { NotebookPen, Sparkles, Wifi } from "lucide-react";
+import { NotebookPen } from "lucide-react";
 import { useAuth } from "@/app/components/AuthProvider";
 import ProfileMenu from "@/app/components/ProfileMenu";
 import ThemeToggle from "@/app/components/ThemeToggle";
