@@ -19,30 +19,21 @@ import MainLayout from "@/app/components/MainLayout";
 import PresencePanel from "@/app/components/PresencePanel";
 import ProtectedPage from "@/app/components/ProtectedPage";
 import { notesApi } from "@/app/lib/api";
-import {
-  connectSocket,
-  disconnectSocket,
-  type AppSocket,
-} from "@/app/lib/socket";
 import type { ActivityLog, Note, Role, UserSummary } from "@/app/types";
 
 export default function NoteEditorPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id") || "";
-  const { user, token, loading: authLoading } = useAuth();
-  const [socket, setSocket] = useState<AppSocket | null>(null);
+  const { user, loading: authLoading } = useAuth();
   const [note, setNote] = useState<Note | null>(null);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<UserSummary[]>([]);
-  const [typingUsers, setTypingUsers] = useState<UserSummary[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
-  const titleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const contentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const role = useMemo<Role | null>(() => {
     if (!note || !user) {
@@ -62,6 +53,21 @@ export default function NoteEditorPage() {
   const canEdit = role === "owner" || role === "editor";
   const canShare = role === "owner";
 
+  const onlineUsers = useMemo<UserSummary[]>(() => {
+    if (!user) {
+      return [];
+    }
+
+    return [
+      {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || "",
+      },
+    ];
+  }, [user]);
+
   const wordCount = useMemo(() => {
     return content.trim().split(/\s+/).filter(Boolean).length;
   }, [content]);
@@ -69,7 +75,7 @@ export default function NoteEditorPage() {
   const roleLabel = role || "no-access";
 
   useEffect(() => {
-    if (authLoading || !user || !token || !id) {
+    if (authLoading || !user || !id) {
       return;
     }
 
@@ -109,131 +115,102 @@ export default function NoteEditorPage() {
     return () => {
       active = false;
     };
-  }, [authLoading, user, token, id]);
+  }, [authLoading, user, id]);
 
   useEffect(() => {
-    if (authLoading || !user || !token) {
+    if (authLoading || !user || !id) {
       return;
     }
 
-    const connectedSocket = connectSocket(token);
-    setSocket(connectedSocket);
+    let active = true;
+
+    const refreshActivities = async () => {
+      try {
+        const activityData = await notesApi.getActivities(id);
+
+        if (active) {
+          setActivities(activityData);
+        }
+      } catch {
+        if (active) {
+          setError("Gagal memperbarui activity note.");
+        }
+      }
+    };
+
+    const interval = window.setInterval(refreshActivities, 8000);
 
     return () => {
-      disconnectSocket();
-      setSocket(null);
+      active = false;
+      window.clearInterval(interval);
     };
-  }, [authLoading, user, token]);
+  }, [authLoading, user, id]);
 
   useEffect(() => {
-    if (!socket || !id || !user) {
+    return () => {
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+      }
+    };
+  }, []);
+
+  const refreshActivities = async () => {
+    try {
+      const activityData = await notesApi.getActivities(id);
+      setActivities(activityData);
+    } catch {
+      setError("Note tersimpan, tetapi activity gagal diperbarui.");
+    }
+  };
+
+  const scheduleSave = (nextTitle: string, nextContent: string) => {
+    if (!id || !canEdit) {
       return;
     }
 
-    socket.emit("join_note", { noteId: id });
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+    }
 
-    socket.on("online_users", (users) => {
-      setOnlineUsers(users);
-    });
+    setSaving(true);
+    setError("");
 
-    socket.on("note_title_updated", (payload) => {
-      if (payload.updatedBy._id !== user._id) {
-        setTitle(payload.title);
+    saveTimer.current = setTimeout(async () => {
+      try {
+        const updatedNote = await notesApi.updateNote(id, {
+          title: nextTitle,
+          content: nextContent,
+        });
+
+        setNote(updatedNote);
+        await refreshActivities();
+      } catch {
+        setError("Gagal menyimpan note.");
+      } finally {
+        setSaving(false);
       }
-    });
-
-    socket.on("note_content_updated", (payload) => {
-      if (payload.updatedBy._id !== user._id) {
-        setContent(payload.content);
-      }
-    });
-
-    socket.on("activity_created", (activity) => {
-      setActivities((current) => {
-        if (current.some((item) => item._id === activity._id)) {
-          return current;
-        }
-
-        return [activity, ...current].slice(0, 50);
-      });
-    });
-
-    socket.on("user_typing", (typingUser) => {
-      if (typingUser._id === user._id) {
-        return;
-      }
-
-      setTypingUsers((current) => {
-        if (current.some((item) => item._id === typingUser._id)) {
-          return current;
-        }
-
-        return [...current, typingUser];
-      });
-    });
-
-    socket.on("user_stop_typing", (userId) => {
-      setTypingUsers((current) =>
-        current.filter((item) => item._id !== userId),
-      );
-    });
-
-    socket.on("error_message", (message) => {
-      setError(message);
-    });
-
-    return () => {
-      socket.emit("leave_note", { noteId: id });
-      socket.off("online_users");
-      socket.off("note_title_updated");
-      socket.off("note_content_updated");
-      socket.off("activity_created");
-      socket.off("user_typing");
-      socket.off("user_stop_typing");
-      socket.off("error_message");
-    };
-  }, [socket, id, user]);
+    }, 900);
+  };
 
   const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setTitle(value);
-
-    if (!socket || !id || !canEdit) {
-      return;
-    }
-
-    if (titleTimer.current) {
-      clearTimeout(titleTimer.current);
-    }
-
-    titleTimer.current = setTimeout(() => {
-      socket.emit("note_title_update", { noteId: id, title: value });
-    }, 500);
+    scheduleSave(value, content);
   };
 
   const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const value = event.target.value;
     setContent(value);
-
-    if (!socket || !id || !canEdit) {
-      return;
-    }
-
-    socket.emit("typing_start", { noteId: id });
-
-    if (contentTimer.current) {
-      clearTimeout(contentTimer.current);
-    }
-
-    contentTimer.current = setTimeout(() => {
-      socket.emit("note_content_update", { noteId: id, content: value });
-      socket.emit("typing_stop", { noteId: id });
-    }, 700);
+    scheduleSave(title, value);
   };
 
   const saveManually = async () => {
     if (!id || !canEdit) {
       return;
+    }
+
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
     }
 
     setSaving(true);
@@ -242,6 +219,7 @@ export default function NoteEditorPage() {
     try {
       const updatedNote = await notesApi.updateNote(id, { title, content });
       setNote(updatedNote);
+      await refreshActivities();
     } catch {
       setError("Gagal menyimpan note.");
     } finally {
@@ -304,7 +282,7 @@ export default function NoteEditorPage() {
 
                       <span className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
                         <UsersRound size={14} />
-                        {onlineUsers.length} online
+                        {onlineUsers.length} aktif
                       </span>
 
                       {canEdit && (
@@ -378,8 +356,11 @@ export default function NoteEditorPage() {
                   />
 
                   <div className="mt-4 min-h-6 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                    {typingUsers.length > 0 &&
-                      `${typingUsers.map((item) => item.name).join(", ")} sedang mengetik...`}
+                    {saving
+                      ? "Menyimpan perubahan..."
+                      : canEdit
+                        ? "Perubahan disimpan otomatis melalui API Route Next.js."
+                        : "Mode viewer. Kamu tidak bisa mengedit note ini."}
                   </div>
                 </div>
               </section>
