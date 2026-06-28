@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import {
+  ArrowLeft,
   Eye,
   EyeOff,
   NotebookPen,
@@ -53,10 +54,29 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-red-50 px-5 py-8 text-slate-950 dark:bg-red-950 dark:text-slate-50 sm:px-8">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_10%,rgba(244,63,94,0.26),transparent_35%),radial-gradient(circle_at_82%_20%,rgba(220,38,38,0.2),transparent_30%),radial-gradient(circle_at_72%_88%,rgba(251,113,133,0.2),transparent_34%)] dark:bg-[radial-gradient(circle_at_15%_10%,rgba(244,63,94,0.18),transparent_35%),radial-gradient(circle_at_82%_20%,rgba(220,38,38,0.16),transparent_30%),radial-gradient(circle_at_72%_88%,rgba(251,113,133,0.12),transparent_34%)]" />
+    <div className="relative isolate min-h-screen overflow-hidden bg-[#fffafa] px-5 py-6 text-slate-950 dark:bg-[#080304] dark:text-slate-50 sm:px-8">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_10%,rgba(244,63,94,0.22),transparent_35%),radial-gradient(circle_at_82%_20%,rgba(190,18,60,0.14),transparent_30%),radial-gradient(circle_at_72%_88%,rgba(255,107,107,0.14),transparent_34%)] dark:bg-[radial-gradient(circle_at_15%_10%,rgba(244,63,94,0.16),transparent_35%),radial-gradient(circle_at_82%_20%,rgba(190,18,60,0.14),transparent_30%),radial-gradient(circle_at_72%_88%,rgba(255,107,107,0.08),transparent_34%)]" />
 
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_460px]">
+      <div className="mx-auto mb-6 flex w-full max-w-6xl items-center justify-between">
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-red-100 bg-white/80 px-4 py-2 text-sm font-black text-red-700 shadow-lg shadow-red-200/45 backdrop-blur transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 dark:border-red-900/50 dark:bg-red-950/35 dark:text-red-100 dark:shadow-black/25 dark:hover:bg-red-900/35"
+        >
+          <ArrowLeft size={17} />
+          Halaman utama
+        </Link>
+
+        <Link href="/" className="hidden items-center gap-2 sm:inline-flex">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-red-400 via-red-600 to-red-900 text-white shadow-lg shadow-red-600/30">
+            <NotebookPen size={20} />
+          </span>
+          <span className="text-sm font-black tracking-tight text-slate-950 dark:text-slate-50">
+            Realtime Notes
+          </span>
+        </Link>
+      </div>
+
+      <div className="mx-auto grid min-h-[calc(100vh-6.5rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_460px]">
         <section className="hidden lg:block">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-200 bg-white/75 px-4 py-2 text-xs font-black text-red-700 shadow-lg shadow-red-200/50 backdrop-blur dark:border-red-900/60 dark:bg-red-950/40 dark:text-rose-200 dark:shadow-black/20">
             <Sparkles size={15} />
@@ -110,7 +130,7 @@ export default function RegisterPage() {
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-rose-400/14 blur-3xl" />
 
           <div className="relative mb-8">
-            <div className="mb-5 grid h-14 w-14 place-items-center rounded-3xl bg-gradient-to-br from-rose-400 via-red-600 to-red-800 text-white shadow-lg shadow-red-600/30">
+            <div className="mb-5 grid h-14 w-14 place-items-center rounded-3xl bg-gradient-to-br from-red-400 via-red-600 to-red-900 text-white shadow-lg shadow-red-600/30">
               <NotebookPen size={28} />
             </div>
 
@@ -187,7 +207,7 @@ export default function RegisterPage() {
           </div>
 
           <button
-            className="mt-6 w-full rounded-2xl bg-gradient-to-br from-rose-400 via-red-600 to-red-800 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-600/30 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 w-full rounded-2xl bg-gradient-to-br from-red-400 via-red-600 to-red-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-600/30 transition hover:-translate-y-0.5 hover:shadow-red-600/45 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={loading}
           >
             {loading ? "Memproses..." : "Register"}
