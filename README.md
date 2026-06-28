@@ -54,21 +54,6 @@ Viewer adalah collaborator yang hanya diberi akses membaca. Viewer dapat membuka
 - bcryptjs
 - Lucide React
 
-## Struktur Project
-
-```bash
-app/
-├── api/
-│   └── route.ts
-├── components/
-├── lib/
-├── models/
-├── types/
-├── globals.css
-├── layout.tsx
-└── page.tsx
-```
-
 ## Environment Variables
 
 Buat file `.env.local` atau `.env` di root project.
