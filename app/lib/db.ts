@@ -2,7 +2,6 @@ import dns from "dns";
 import mongoose from "mongoose";
 
 dns.setDefaultResultOrder("ipv4first");
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 type MongooseCache = {
   conn: typeof mongoose | null;
@@ -46,9 +45,15 @@ export const connectDatabase = async () => {
   if (!cache.promise) {
     cache.promise = mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 30000,
+      bufferCommands: false,
     });
   }
 
-  cache.conn = await cache.promise;
-  return cache.conn;
+  try {
+    cache.conn = await cache.promise;
+    return cache.conn;
+  } catch (error) {
+    cache.promise = null;
+    throw error;
+  }
 };
