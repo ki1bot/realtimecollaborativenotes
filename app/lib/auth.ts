@@ -8,6 +8,7 @@ export class AuthError extends Error {
 
   constructor(message: string) {
     super(message);
+    this.name = "AuthError";
     this.status = 401;
   }
 }
@@ -28,7 +29,18 @@ export const getAuthUser = async (request: NextRequest) => {
     throw new Error("JWT_SECRET belum diisi");
   }
 
-  const decoded = jwt.verify(token, jwtSecret) as { id: string };
+  let decoded: { id: string };
+
+  try {
+    decoded = jwt.verify(token, jwtSecret) as { id: string };
+  } catch {
+    throw new AuthError("Token tidak valid atau sudah kedaluwarsa");
+  }
+
+  if (!decoded.id) {
+    throw new AuthError("Token tidak valid");
+  }
+
   const user = await User.findById(decoded.id).select("-password");
 
   if (!user) {
