@@ -1,65 +1,70 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sky-50: #f8fafc;
-  --color-sky-100: #f1f5f9;
-  --color-sky-200: #e2e8f0;
-  --color-sky-300: #cbd5e1;
-  --color-sky-400: #94a3b8;
-  --color-sky-500: #64748b;
-  --color-sky-600: #475569;
-  --color-sky-700: #334155;
-  --color-sky-900: #0f172a;
-  --color-sky-950: #020617;
+  --color-sky-50: #fff1f2;
+  --color-sky-100: #ffe4e6;
+  --color-sky-200: #fecdd3;
+  --color-sky-300: #fda4af;
+  --color-sky-400: #fb7185;
+  --color-sky-500: #f43f5e;
+  --color-sky-600: #e11d48;
+  --color-sky-700: #be123c;
+  --color-sky-800: #9f1239;
+  --color-sky-900: #881337;
+  --color-sky-950: #4c0519;
 
-  --color-blue-50: #f8fafc;
-  --color-blue-100: #f1f5f9;
-  --color-blue-200: #e2e8f0;
-  --color-blue-300: #cbd5e1;
-  --color-blue-400: #94a3b8;
-  --color-blue-500: #64748b;
-  --color-blue-600: #475569;
-  --color-blue-700: #334155;
-  --color-blue-900: #0f172a;
-  --color-blue-950: #020617;
+  --color-cyan-50: #fff1f2;
+  --color-cyan-100: #ffe4e6;
+  --color-cyan-200: #fecdd3;
+  --color-cyan-300: #fda4af;
+  --color-cyan-400: #fb7185;
+  --color-cyan-500: #f43f5e;
+  --color-cyan-600: #e11d48;
+  --color-cyan-700: #be123c;
+  --color-cyan-800: #9f1239;
+  --color-cyan-900: #881337;
+  --color-cyan-950: #4c0519;
 
-  --color-indigo-50: #f8fafc;
-  --color-indigo-100: #f1f5f9;
-  --color-indigo-200: #e2e8f0;
-  --color-indigo-300: #cbd5e1;
-  --color-indigo-400: #94a3b8;
-  --color-indigo-500: #64748b;
-  --color-indigo-600: #475569;
-  --color-indigo-700: #334155;
-  --color-indigo-900: #0f172a;
-  --color-indigo-950: #020617;
+  --color-blue-50: #fff1f2;
+  --color-blue-100: #ffe4e6;
+  --color-blue-200: #fecdd3;
+  --color-blue-300: #fda4af;
+  --color-blue-400: #fb7185;
+  --color-blue-500: #f43f5e;
+  --color-blue-600: #e11d48;
+  --color-blue-700: #be123c;
+  --color-blue-800: #9f1239;
+  --color-blue-900: #881337;
+  --color-blue-950: #4c0519;
 
-  --color-cyan-400: #94a3b8;
-  --color-cyan-500: #64748b;
-  --color-cyan-600: #475569;
-
-  --color-emerald-50: #f8fafc;
-  --color-emerald-300: #cbd5e1;
-  --color-emerald-400: #94a3b8;
-  --color-emerald-600: #475569;
-  --color-emerald-700: #334155;
-  --color-emerald-900: #0f172a;
-  --color-emerald-950: #020617;
-
-  --color-red-50: #f8fafc;
-  --color-red-100: #f1f5f9;
-  --color-red-200: #e2e8f0;
-  --color-red-300: #cbd5e1;
-  --color-red-500: #64748b;
-  --color-red-600: #475569;
-  --color-red-900: #0f172a;
-  --color-red-950: #020617;
+  --color-indigo-50: #fff1f2;
+  --color-indigo-100: #ffe4e6;
+  --color-indigo-200: #fecdd3;
+  --color-indigo-300: #fda4af;
+  --color-indigo-400: #fb7185;
+  --color-indigo-500: #f43f5e;
+  --color-indigo-600: #dc2626;
+  --color-indigo-700: #b91c1c;
+  --color-indigo-800: #991b1b;
+  --color-indigo-900: #7f1d1d;
+  --color-indigo-950: #450a0a;
 }
 
-@custom-variant dark (&:where([data-theme="__disabled__"], [data-theme="__disabled__"] *));
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   color-scheme: light;
+  --app-bg: #fff7f7;
+  --app-text: #0f172a;
+}
+
+html.dark,
+html[data-theme="dark"],
+body.dark,
+body[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #120407;
+  --app-text: #ffe4e6;
 }
 
 * {
@@ -68,7 +73,7 @@
 
 html {
   scroll-behavior: smooth;
-  background: #f8fafc;
+  background: var(--app-bg);
 }
 
 body {
@@ -76,21 +81,45 @@ body {
   overflow-x: hidden;
   background:
     radial-gradient(
-      circle at 14% 12%,
-      rgba(203, 213, 225, 0.55),
+      circle at 12% 10%,
+      rgba(244, 63, 94, 0.22),
+      transparent 32%
+    ),
+    radial-gradient(circle at 86% 12%, rgba(220, 38, 38, 0.2), transparent 30%),
+    radial-gradient(
+      circle at 72% 90%,
+      rgba(251, 113, 133, 0.16),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #fff7f7 0%, #fff1f2 42%, #ffe4e6 100%);
+  color: var(--app-text);
+}
+
+html.dark body,
+html[data-theme="dark"] body,
+body.dark,
+body[data-theme="dark"] {
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      rgba(244, 63, 94, 0.18),
       transparent 34%
     ),
     radial-gradient(
-      circle at 86% 10%,
-      rgba(226, 232, 240, 0.8),
+      circle at 86% 12%,
+      rgba(220, 38, 38, 0.18),
       transparent 32%
     ),
-    linear-gradient(135deg, #ffffff 0%, #f8fafc 42%, #e5e7eb 100%);
-  color: #0f172a;
+    radial-gradient(
+      circle at 70% 88%,
+      rgba(251, 113, 133, 0.12),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #120407 0%, #1f0a0d 42%, #450a0a 100%);
 }
 
 ::selection {
-  background: rgba(100, 116, 139, 0.22);
+  background: rgba(225, 29, 72, 0.24);
   color: inherit;
 }
 
@@ -119,9 +148,9 @@ textarea {
   border: 3px solid transparent;
   border-radius: 999px;
   background-clip: content-box;
-  background-color: rgba(100, 116, 139, 0.45);
+  background-color: rgba(225, 29, 72, 0.42);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(71, 85, 105, 0.75);
+  background-color: rgba(190, 18, 60, 0.72);
 }
