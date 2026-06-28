@@ -1,60 +1,84 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sky-50: #fff1f2;
-  --color-sky-100: #ffe4e6;
-  --color-sky-200: #fecdd3;
-  --color-sky-300: #fda4af;
-  --color-sky-400: #fb7185;
+  --color-sky-50: #fff7f7;
+  --color-sky-100: #ffe8e8;
+  --color-sky-200: #ffcaca;
+  --color-sky-300: #ff9f9f;
+  --color-sky-400: #ff6b6b;
   --color-sky-500: #f43f5e;
   --color-sky-600: #e11d48;
   --color-sky-700: #be123c;
-  --color-sky-800: #9f1239;
-  --color-sky-900: #881337;
-  --color-sky-950: #4c0519;
+  --color-sky-800: #881337;
+  --color-sky-900: #5f0f1b;
+  --color-sky-950: #2a0308;
 
-  --color-cyan-50: #fff1f2;
-  --color-cyan-100: #ffe4e6;
-  --color-cyan-200: #fecdd3;
-  --color-cyan-300: #fda4af;
-  --color-cyan-400: #fb7185;
+  --color-cyan-50: #fff7f7;
+  --color-cyan-100: #ffe8e8;
+  --color-cyan-200: #ffcaca;
+  --color-cyan-300: #ff9f9f;
+  --color-cyan-400: #ff6b6b;
   --color-cyan-500: #f43f5e;
   --color-cyan-600: #e11d48;
   --color-cyan-700: #be123c;
-  --color-cyan-800: #9f1239;
-  --color-cyan-900: #881337;
-  --color-cyan-950: #4c0519;
+  --color-cyan-800: #881337;
+  --color-cyan-900: #5f0f1b;
+  --color-cyan-950: #2a0308;
 
-  --color-blue-50: #fff1f2;
-  --color-blue-100: #ffe4e6;
-  --color-blue-200: #fecdd3;
-  --color-blue-300: #fda4af;
-  --color-blue-400: #fb7185;
+  --color-blue-50: #fff7f7;
+  --color-blue-100: #ffe8e8;
+  --color-blue-200: #ffcaca;
+  --color-blue-300: #ff9f9f;
+  --color-blue-400: #ff6b6b;
   --color-blue-500: #f43f5e;
   --color-blue-600: #e11d48;
   --color-blue-700: #be123c;
-  --color-blue-800: #9f1239;
-  --color-blue-900: #881337;
-  --color-blue-950: #4c0519;
+  --color-blue-800: #881337;
+  --color-blue-900: #5f0f1b;
+  --color-blue-950: #2a0308;
 
-  --color-indigo-50: #fff1f2;
-  --color-indigo-100: #ffe4e6;
-  --color-indigo-200: #fecdd3;
-  --color-indigo-300: #fda4af;
-  --color-indigo-400: #fb7185;
+  --color-indigo-50: #fff7f7;
+  --color-indigo-100: #ffe8e8;
+  --color-indigo-200: #ffcaca;
+  --color-indigo-300: #ff9f9f;
+  --color-indigo-400: #ff6b6b;
   --color-indigo-500: #f43f5e;
-  --color-indigo-600: #dc2626;
-  --color-indigo-700: #b91c1c;
-  --color-indigo-800: #991b1b;
-  --color-indigo-900: #7f1d1d;
-  --color-indigo-950: #450a0a;
+  --color-indigo-600: #e11d48;
+  --color-indigo-700: #be123c;
+  --color-indigo-800: #881337;
+  --color-indigo-900: #5f0f1b;
+  --color-indigo-950: #2a0308;
+
+  --color-rose-50: #fff7f7;
+  --color-rose-100: #ffe8e8;
+  --color-rose-200: #ffcaca;
+  --color-rose-300: #ff9f9f;
+  --color-rose-400: #ff6b6b;
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+  --color-rose-700: #be123c;
+  --color-rose-800: #881337;
+  --color-rose-900: #5f0f1b;
+  --color-rose-950: #2a0308;
+
+  --color-red-50: #fff7f7;
+  --color-red-100: #ffe8e8;
+  --color-red-200: #ffcaca;
+  --color-red-300: #ff9f9f;
+  --color-red-400: #ff6b6b;
+  --color-red-500: #f43f5e;
+  --color-red-600: #e11d48;
+  --color-red-700: #be123c;
+  --color-red-800: #881337;
+  --color-red-900: #5f0f1b;
+  --color-red-950: #2a0308;
 }
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   color-scheme: light;
-  --app-bg: #fff7f7;
+  --app-bg: #fffafa;
   --app-text: #0f172a;
 }
 
@@ -63,8 +87,8 @@ html[data-theme="dark"],
 body.dark,
 body[data-theme="dark"] {
   color-scheme: dark;
-  --app-bg: #120407;
-  --app-text: #ffe4e6;
+  --app-bg: #080304;
+  --app-text: #fff1f2;
 }
 
 * {
@@ -80,18 +104,18 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background:
+    radial-gradient(circle at 12% 8%, rgba(244, 63, 94, 0.18), transparent 34%),
     radial-gradient(
-      circle at 12% 10%,
-      rgba(244, 63, 94, 0.22),
+      circle at 88% 14%,
+      rgba(190, 18, 60, 0.12),
       transparent 32%
     ),
-    radial-gradient(circle at 86% 12%, rgba(220, 38, 38, 0.2), transparent 30%),
     radial-gradient(
-      circle at 72% 90%,
-      rgba(251, 113, 133, 0.16),
+      circle at 72% 88%,
+      rgba(255, 107, 107, 0.12),
       transparent 34%
     ),
-    linear-gradient(135deg, #fff7f7 0%, #fff1f2 42%, #ffe4e6 100%);
+    linear-gradient(135deg, #fffafa 0%, #fff5f5 44%, #ffeef0 100%);
   color: var(--app-text);
 }
 
@@ -100,22 +124,18 @@ html[data-theme="dark"] body,
 body.dark,
 body[data-theme="dark"] {
   background:
+    radial-gradient(circle at 12% 8%, rgba(244, 63, 94, 0.14), transparent 36%),
     radial-gradient(
-      circle at 12% 10%,
-      rgba(244, 63, 94, 0.18),
+      circle at 88% 14%,
+      rgba(190, 18, 60, 0.16),
       transparent 34%
     ),
     radial-gradient(
-      circle at 86% 12%,
-      rgba(220, 38, 38, 0.18),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at 70% 88%,
-      rgba(251, 113, 133, 0.12),
+      circle at 72% 88%,
+      rgba(255, 107, 107, 0.08),
       transparent 34%
     ),
-    linear-gradient(135deg, #120407 0%, #1f0a0d 42%, #450a0a 100%);
+    linear-gradient(135deg, #080304 0%, #130608 48%, #22080d 100%);
 }
 
 ::selection {
@@ -153,4 +173,10 @@ textarea {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(190, 18, 60, 0.72);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

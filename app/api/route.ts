@@ -3,7 +3,6 @@ import { getAuthUser } from "@/app/lib/auth";
 import { connectDatabase } from "@/app/lib/db";
 import { generateToken } from "@/app/lib/jwt";
 import { canEditNote, canViewNote, isOwner } from "@/app/lib/permissions";
-import ActivityLog from "@/app/models/ActivityLog";
 import Note from "@/app/models/Note";
 import User from "@/app/models/User";
 
@@ -21,25 +20,6 @@ const populateNote = (query: any) => {
     .populate("owner", "_id name email avatar")
     .populate("collaborators.user", "_id name email avatar")
     .populate("lastEditedBy", "_id name email avatar");
-};
-
-const createActivity = async ({
-  note,
-  user,
-  action,
-  message,
-}: {
-  note: string;
-  user: string;
-  action: string;
-  message: string;
-}) => {
-  return ActivityLog.create({
-    note,
-    user,
-    action,
-    message,
-  });
 };
 
 const jsonError = (message: string, status: number) => {
@@ -149,12 +129,7 @@ export async function GET(request: NextRequest) {
         return jsonError("Kamu tidak punya akses ke activity note ini", 403);
       }
 
-      const activities = await ActivityLog.find({ note: note._id })
-        .populate("user", "_id name email avatar")
-        .sort({ createdAt: -1 })
-        .limit(50);
-
-      return NextResponse.json(activities);
+      return NextResponse.json([]);
     }
 
     if (action === "users") {
@@ -264,13 +239,6 @@ export async function POST(request: NextRequest) {
         lastEditedBy: user._id,
       });
 
-      await createActivity({
-        note: String(note._id),
-        user: String(user._id),
-        action: "created",
-        message: `${user.name} created this note`,
-      });
-
       const populatedNote = await populateNote(Note.findById(note._id));
 
       return NextResponse.json(populatedNote, { status: 201 });
@@ -326,13 +294,6 @@ export async function POST(request: NextRequest) {
       }
 
       await note.save();
-
-      await createActivity({
-        note: String(note._id),
-        user: String(user._id),
-        action: "shared",
-        message: `${user.name} shared this note with ${targetUser.name} as ${selectedRole}`,
-      });
 
       const populatedNote = await populateNote(Note.findById(note._id));
 
@@ -411,28 +372,21 @@ export async function PATCH(request: NextRequest) {
         return jsonError("Role viewer tidak boleh mengedit note", 403);
       }
 
-      const updates: string[] = [];
+      let hasChanges = false;
 
       if (typeof body.title === "string" && body.title.trim() !== note.title) {
         note.title = body.title.trim() || "Untitled Note";
-        updates.push("title");
+        hasChanges = true;
       }
 
       if (typeof body.content === "string" && body.content !== note.content) {
         note.content = body.content;
-        updates.push("content");
+        hasChanges = true;
       }
 
-      note.lastEditedBy = user._id;
-      await note.save();
-
-      if (updates.length > 0) {
-        await createActivity({
-          note: String(note._id),
-          user: String(user._id),
-          action: "updated",
-          message: `${user.name} updated ${updates.join(" and ")}`,
-        });
+      if (hasChanges) {
+        note.lastEditedBy = user._id;
+        await note.save();
       }
 
       const populatedNote = await populateNote(Note.findById(note._id));
@@ -471,7 +425,6 @@ export async function DELETE(request: NextRequest) {
         return jsonError("Hanya owner yang boleh menghapus note", 403);
       }
 
-      await ActivityLog.deleteMany({ note: note._id });
       await note.deleteOne();
 
       return NextResponse.json({
@@ -498,22 +451,11 @@ export async function DELETE(request: NextRequest) {
         return jsonError("Hanya owner yang boleh menghapus collaborator", 403);
       }
 
-      const targetUser = await User.findById(userId);
-
       note.collaborators = note.collaborators.filter((item: any) => {
         return String(item.user) !== String(userId) || item.role === "owner";
       });
 
       await note.save();
-
-      if (targetUser) {
-        await createActivity({
-          note: String(note._id),
-          user: String(user._id),
-          action: "removed_collaborator",
-          message: `${user.name} removed ${targetUser.name} from this note`,
-        });
-      }
 
       const populatedNote = await populateNote(Note.findById(note._id));
 
