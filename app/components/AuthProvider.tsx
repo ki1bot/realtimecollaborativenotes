@@ -1,5 +1,6 @@
 "use client";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import {
   createContext,
   useContext,
@@ -14,7 +15,9 @@ interface AuthContextValue {
   user: User | null;
   token: string | null;
   loading: boolean;
+  googleClientId: string;
   login: (payload: LoginPayload) => Promise<void>;
+  loginWithGoogle: (code: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
 }
@@ -25,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
@@ -58,20 +62,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
   }, []);
 
-  const login = async (payload: LoginPayload) => {
-    const data = await authApi.login(payload);
+  const saveSession = (data: { token: string; user: User }) => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
     setToken(data.token);
     setUser(data.user);
   };
 
+  const login = async (payload: LoginPayload) => {
+    const data = await authApi.login(payload);
+    saveSession(data);
+  };
+
+  const loginWithGoogle = async (code: string) => {
+    const data = await authApi.googleLogin({ code });
+    saveSession(data);
+  };
+
   const register = async (payload: RegisterPayload) => {
     const data = await authApi.register(payload);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    setToken(data.token);
-    setUser(data.user);
+    saveSession(data);
   };
 
   const logout = () => {
@@ -81,12 +91,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const value = {
+    user,
+    token,
+    loading,
+    googleClientId,
+    login,
+    loginWithGoogle,
+    register,
+    logout,
+  };
+
+  if (!googleClientId) {
+    return (
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    );
+  }
+
   return (
-    <AuthContext.Provider
-      value={{ user, token, loading, login, register, logout }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    </GoogleOAuthProvider>
   );
 };
 

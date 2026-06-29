@@ -2,6 +2,7 @@ import axios from "axios";
 import type {
   ActivityLog,
   AuthResponse,
+  GoogleLoginPayload,
   LoginPayload,
   Note,
   RegisterPayload,
@@ -52,6 +53,14 @@ export const authApi = {
   async login(payload: LoginPayload): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>("", payload, {
       params: { action: "login" },
+    });
+
+    return response.data;
+  },
+
+  async googleLogin(payload: GoogleLoginPayload): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>("", payload, {
+      params: { action: "google-login" },
     });
 
     return response.data;

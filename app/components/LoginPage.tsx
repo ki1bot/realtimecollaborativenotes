@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { useGoogleLogin, type CodeResponse } from "@react-oauth/google";
 import {
   ArrowLeft,
   Eye,
@@ -10,14 +11,76 @@ import {
   Sparkles,
   Wifi,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
 
+function GoogleLoginButton({
+  disabled,
+  onError,
+}: {
+  disabled: boolean;
+  onError: (message: string) => void;
+}) {
+  const router = useRouter();
+  const { loginWithGoogle } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = useGoogleLogin({
+    flow: "auth-code",
+    scope: "openid email profile",
+    onSuccess: async (response: CodeResponse) => {
+      onError("");
+      setGoogleLoading(true);
+
+      try {
+        if (!response.code) {
+          onError("Kode login Google tidak ditemukan");
+          return;
+        }
+
+        await loginWithGoogle(response.code);
+        router.replace("/");
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          onError(err.response?.data?.message || "Login Google gagal");
+        } else {
+          onError("Login Google gagal");
+        }
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      onError("Login Google dibatalkan atau gagal");
+      setGoogleLoading(false);
+    },
+  });
+
+  return (
+    <button
+      type="button"
+      className="mb-5 flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800 shadow-lg shadow-red-100/40 transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-50 dark:shadow-black/20 dark:hover:bg-red-900/35"
+      disabled={disabled || googleLoading}
+      onClick={() => handleGoogleLogin()}
+    >
+      <Image
+        src="/icons/google.png"
+        alt="Google"
+        width={22}
+        height={22}
+        className="h-[22px] w-[22px]"
+      />
+      {googleLoading ? "Menghubungkan Google..." : "Login dengan Google"}
+    </button>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
-  const { login, user, loading: authLoading } = useAuth();
+  const { login, user, loading: authLoading, googleClientId } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -147,6 +210,25 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+
+          {googleClientId ? (
+            <GoogleLoginButton
+              disabled={loading || authLoading}
+              onError={setError}
+            />
+          ) : (
+            <div className="mb-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-rose-200">
+              NEXT_PUBLIC_GOOGLE_CLIENT_ID belum diisi di .env.local
+            </div>
+          )}
+
+          <div className="mb-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-red-100 dark:bg-red-900/60" />
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 dark:text-red-100/50">
+              atau
+            </span>
+            <span className="h-px flex-1 bg-red-100 dark:bg-red-900/60" />
+          </div>
 
           <div>
             <label className="mb-2 block text-sm font-black text-slate-800 dark:text-red-50">

@@ -1,3 +1,5 @@
+import { randomBytes } from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/app/lib/auth";
 import { connectDatabase } from "@/app/lib/db";
@@ -74,6 +76,63 @@ const getId = (request: NextRequest) => {
 
 const getUserId = (request: NextRequest) => {
   return request.nextUrl.searchParams.get("userId") || "";
+};
+
+const getGoogleClient = () => {
+  const googleClientId =
+    process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+  if (!googleClientId || !googleClientSecret) {
+    const error = new Error(
+      "GOOGLE_CLIENT_ID, NEXT_PUBLIC_GOOGLE_CLIENT_ID, dan GOOGLE_CLIENT_SECRET wajib diisi",
+    ) as Error & { status?: number };
+
+    error.status = 500;
+    throw error;
+  }
+
+  return {
+    googleClientId,
+    client: new OAuth2Client(googleClientId, googleClientSecret, "postmessage"),
+  };
+};
+
+const getGoogleProfile = async (code: string) => {
+  const { googleClientId, client } = getGoogleClient();
+  const { tokens } = await client.getToken(code);
+
+  if (!tokens.id_token) {
+    const error = new Error("Token Google tidak valid") as Error & {
+      status?: number;
+    };
+
+    error.status = 401;
+    throw error;
+  }
+
+  const ticket = await client.verifyIdToken({
+    idToken: tokens.id_token,
+    audience: googleClientId,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload?.email || !payload.email_verified) {
+    const error = new Error("Email Google belum terverifikasi") as Error & {
+      status?: number;
+    };
+
+    error.status = 401;
+    throw error;
+  }
+
+  return {
+    googleId: payload.sub,
+    name: payload.name || payload.email.split("@")[0],
+    email: payload.email.trim().toLowerCase(),
+    avatar: payload.picture || "",
+  };
 };
 
 const createActivity = async ({
@@ -256,6 +315,42 @@ export async function POST(request: NextRequest) {
 
       if (!user || !(await user.comparePassword(password))) {
         return jsonError("Email atau password salah", 401);
+      }
+
+      return NextResponse.json({
+        user: formatUser(user),
+        token: generateToken(String(user._id)),
+      });
+    }
+
+    if (action === "google-login") {
+      const code = body.code?.trim();
+
+      if (!code) {
+        return jsonError("Kode login Google tidak ditemukan", 400);
+      }
+
+      const googleProfile = await getGoogleProfile(code);
+      let user = await User.findOne({ email: googleProfile.email });
+
+      if (!user) {
+        user = await User.create({
+          name: googleProfile.name,
+          email: googleProfile.email,
+          password: randomBytes(32).toString("hex"),
+          avatar: googleProfile.avatar,
+        });
+      } else {
+        let shouldSave = false;
+
+        if (!user.avatar && googleProfile.avatar) {
+          user.avatar = googleProfile.avatar;
+          shouldSave = true;
+        }
+
+        if (shouldSave) {
+          await user.save();
+        }
       }
 
       return NextResponse.json({
