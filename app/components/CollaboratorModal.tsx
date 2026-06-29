@@ -1,9 +1,34 @@
 "use client";
 
-import { Search, Trash2, UserPlus, Users, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  Search,
+  Trash2,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { notesApi, usersApi } from "@/app/lib/api";
 import type { Note, Role, UserSummary } from "@/app/types";
+
+const roleOptions: Array<{
+  value: Exclude<Role, "owner">;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "viewer",
+    label: "Viewer",
+    description: "Hanya bisa membaca note",
+  },
+  {
+    value: "editor",
+    label: "Editor",
+    description: "Bisa membaca dan mengedit note",
+  },
+];
 
 export default function CollaboratorModal({
   note,
@@ -15,10 +40,15 @@ export default function CollaboratorModal({
   onUpdated: (note: Note) => void;
 }) {
   const [keyword, setKeyword] = useState("");
-  const [role, setRole] = useState<Role>("viewer");
+  const [role, setRole] = useState<Exclude<Role, "owner">>("viewer");
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const selectedRole =
+    roleOptions.find((item) => item.value === role) ?? roleOptions[0];
 
   const inputClass =
     "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100";
@@ -42,6 +72,31 @@ export default function CollaboratorModal({
 
     return () => window.clearTimeout(timer);
   }, [keyword]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(event.target as Node)
+      ) {
+        setRoleMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setRoleMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   const addCollaborator = async (userId: string) => {
     setLoading(true);
@@ -107,7 +162,7 @@ export default function CollaboratorModal({
           </div>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_160px]">
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_190px]">
           <div>
             <label className="mb-2 block text-sm font-black text-slate-800 dark:text-slate-200">
               Cari user
@@ -133,14 +188,70 @@ export default function CollaboratorModal({
               Role
             </label>
 
-            <select
-              value={role}
-              onChange={(event) => setRole(event.target.value as Role)}
-              className={inputClass}
-            >
-              <option value="viewer">Viewer</option>
-              <option value="editor">Editor</option>
-            </select>
+            <div className="relative" ref={roleDropdownRef}>
+              <button
+                type="button"
+                className={`${inputClass} flex min-h-[50px] items-center justify-between gap-3 text-left font-bold`}
+                onClick={() => setRoleMenuOpen((current) => !current)}
+                aria-haspopup="listbox"
+                aria-expanded={roleMenuOpen}
+              >
+                <span className="truncate">{selectedRole.label}</span>
+
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 text-slate-400 transition ${
+                    roleMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {roleMenuOpen && (
+                <div
+                  role="listbox"
+                  className="absolute right-0 z-[10000] mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:shadow-black/30"
+                >
+                  {roleOptions.map((option) => {
+                    const active = role === option.value;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition ${
+                          active
+                            ? "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
+                            : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                        }`}
+                        onClick={() => {
+                          setRole(option.value);
+                          setRoleMenuOpen(false);
+                        }}
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-black">
+                            {option.label}
+                          </span>
+
+                          <span className="mt-0.5 block truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+                            {option.description}
+                          </span>
+                        </span>
+
+                        {active && (
+                          <Check
+                            size={17}
+                            className="shrink-0 text-blue-600 dark:text-blue-300"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
