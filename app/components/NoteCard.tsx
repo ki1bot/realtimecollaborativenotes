@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, ExternalLink, Trash2, UserRound } from "lucide-react";
-import type { Note } from "@/app/types";
+import {
+  CalendarDays,
+  ExternalLink,
+  Pencil,
+  Trash2,
+  UserRound,
+} from "lucide-react";
+import { useAuth } from "@/app/components/AuthProvider";
+import type { Note, Role } from "@/app/types";
 
 export default function NoteCard({
   note,
@@ -11,7 +18,20 @@ export default function NoteCard({
   note: Note;
   onDelete: (id: string) => void;
 }) {
+  const { user } = useAuth();
+
   const preview = note.content.trim() || "Belum ada isi catatan.";
+
+  const role: Role | null = user
+    ? note.owner._id === user._id
+      ? "owner"
+      : note.collaborators.find((item) => item.user._id === user._id)?.role ||
+        null
+    : null;
+
+  const canEdit = role === "owner" || role === "editor";
+  const canDelete = role === "owner";
+
   const updatedAt = new Date(note.updatedAt).toLocaleString("id-ID", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -27,14 +47,28 @@ export default function NoteCard({
             <ExternalLink size={19} />
           </div>
 
-          <button
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-red-200 bg-red-50 text-red-500 opacity-100 transition hover:-translate-y-0.5 hover:bg-red-100 dark:border-red-900/70 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/70 sm:opacity-0 sm:group-hover:opacity-100"
-            onClick={() => onDelete(note._id)}
-            aria-label="Hapus note"
-            type="button"
-          >
-            <Trash2 size={17} />
-          </button>
+          <div className="flex items-center gap-2">
+            {canEdit && (
+              <Link
+                href={`/?view=note&id=${note._id}`}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-blue-200 bg-blue-50 text-blue-600 opacity-100 transition hover:-translate-y-0.5 hover:bg-blue-100 dark:border-blue-900/70 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70 sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label="Edit note"
+              >
+                <Pencil size={17} />
+              </Link>
+            )}
+
+            {canDelete && (
+              <button
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-red-200 bg-red-50 text-red-500 opacity-100 transition hover:-translate-y-0.5 hover:bg-red-100 dark:border-red-900/70 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/70 sm:opacity-0 sm:group-hover:opacity-100"
+                onClick={() => onDelete(note._id)}
+                aria-label="Hapus note"
+                type="button"
+              >
+                <Trash2 size={17} />
+              </button>
+            )}
+          </div>
         </div>
 
         <Link

@@ -6,6 +6,7 @@ const activityLogSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Note",
       required: true,
+      index: true,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -15,7 +16,16 @@ const activityLogSchema = new Schema(
     action: {
       type: String,
       required: true,
-      trim: true,
+      enum: [
+        "create",
+        "update_title",
+        "update_content",
+        "update_note",
+        "share",
+        "update_collaborator",
+        "remove_collaborator",
+        "delete",
+      ],
     },
     message: {
       type: String,

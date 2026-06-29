@@ -359,7 +359,7 @@ export default function NoteEditorPage() {
                     {saving
                       ? "Menyimpan perubahan..."
                       : canEdit
-                        ? "Perubahan disimpan otomatis melalui API Route Next.js."
+                        ? "Perubahan disimpan."
                         : "Mode viewer. Kamu tidak bisa mengedit note ini."}
                   </div>
                 </div>

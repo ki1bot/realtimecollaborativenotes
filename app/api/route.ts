@@ -3,6 +3,7 @@ import { getAuthUser } from "@/app/lib/auth";
 import { connectDatabase } from "@/app/lib/db";
 import { generateToken } from "@/app/lib/jwt";
 import { canEditNote, canViewNote, isOwner } from "@/app/lib/permissions";
+import ActivityLog from "@/app/models/ActivityLog";
 import Note from "@/app/models/Note";
 import User from "@/app/models/User";
 
@@ -22,6 +23,10 @@ const populateNote = (query: any) => {
     .populate("lastEditedBy", "_id name email avatar");
 };
 
+const populateActivity = (query: any) => {
+  return query.populate("user", "_id name email avatar");
+};
+
 const jsonError = (message: string, status: number) => {
   return NextResponse.json({ message }, { status });
 };
@@ -38,6 +43,13 @@ const normalizeError = (error: any) => {
     return {
       message: "Email sudah digunakan",
       status: 409,
+    };
+  }
+
+  if (error?.name === "CastError") {
+    return {
+      message: "ID tidak valid",
+      status: 400,
     };
   }
 
@@ -62,6 +74,33 @@ const getId = (request: NextRequest) => {
 
 const getUserId = (request: NextRequest) => {
   return request.nextUrl.searchParams.get("userId") || "";
+};
+
+const createActivity = async ({
+  note,
+  user,
+  action,
+  message,
+}: {
+  note: string;
+  user: string;
+  action:
+    | "create"
+    | "update_title"
+    | "update_content"
+    | "update_note"
+    | "share"
+    | "update_collaborator"
+    | "remove_collaborator"
+    | "delete";
+  message: string;
+}) => {
+  await ActivityLog.create({
+    note,
+    user,
+    action,
+    message,
+  });
 };
 
 export async function GET(request: NextRequest) {
@@ -129,7 +168,11 @@ export async function GET(request: NextRequest) {
         return jsonError("Kamu tidak punya akses ke activity note ini", 403);
       }
 
-      return NextResponse.json([]);
+      const activities = await populateActivity(
+        ActivityLog.find({ note: id }).sort({ createdAt: -1 }).limit(30),
+      );
+
+      return NextResponse.json(activities);
     }
 
     if (action === "users") {
@@ -224,7 +267,7 @@ export async function POST(request: NextRequest) {
     if (action === "notes") {
       const user = await getAuthUser(request);
       const title = body.title?.trim() || "Untitled Note";
-      const content = body.content || "";
+      const content = typeof body.content === "string" ? body.content : "";
 
       const note = await Note.create({
         title,
@@ -237,6 +280,13 @@ export async function POST(request: NextRequest) {
           },
         ],
         lastEditedBy: user._id,
+      });
+
+      await createActivity({
+        note: String(note._id),
+        user: String(user._id),
+        action: "create",
+        message: `${user.name} membuat note "${note.title}".`,
       });
 
       const populatedNote = await populateNote(Note.findById(note._id));
@@ -286,10 +336,24 @@ export async function POST(request: NextRequest) {
 
       if (existingCollaborator) {
         existingCollaborator.role = selectedRole;
+
+        await createActivity({
+          note: String(note._id),
+          user: String(user._id),
+          action: "update_collaborator",
+          message: `${user.name} mengubah role ${targetUser.name} menjadi ${selectedRole}.`,
+        });
       } else {
         note.collaborators.push({
           user: targetUser._id,
           role: selectedRole,
+        });
+
+        await createActivity({
+          note: String(note._id),
+          user: String(user._id),
+          action: "share",
+          message: `${user.name} membagikan note ke ${targetUser.name} sebagai ${selectedRole}.`,
         });
       }
 
@@ -372,21 +436,53 @@ export async function PATCH(request: NextRequest) {
         return jsonError("Role viewer tidak boleh mengedit note", 403);
       }
 
-      let hasChanges = false;
+      const oldTitle = note.title;
+      let titleChanged = false;
+      let contentChanged = false;
 
-      if (typeof body.title === "string" && body.title.trim() !== note.title) {
-        note.title = body.title.trim() || "Untitled Note";
-        hasChanges = true;
+      if (typeof body.title === "string") {
+        const nextTitle = body.title.trim() || "Untitled Note";
+
+        if (nextTitle !== note.title) {
+          note.title = nextTitle;
+          titleChanged = true;
+        }
       }
 
       if (typeof body.content === "string" && body.content !== note.content) {
         note.content = body.content;
-        hasChanges = true;
+        contentChanged = true;
       }
 
-      if (hasChanges) {
+      if (titleChanged || contentChanged) {
         note.lastEditedBy = user._id;
         await note.save();
+
+        let actionType: "update_title" | "update_content" | "update_note" =
+          "update_note";
+        let message = `${user.name} memperbarui note "${note.title}".`;
+
+        if (titleChanged && !contentChanged) {
+          actionType = "update_title";
+          message = `${user.name} mengubah judul note dari "${oldTitle}" menjadi "${note.title}".`;
+        }
+
+        if (!titleChanged && contentChanged) {
+          actionType = "update_content";
+          message = `${user.name} mengubah isi note "${note.title}".`;
+        }
+
+        if (titleChanged && contentChanged) {
+          actionType = "update_note";
+          message = `${user.name} mengubah judul dan isi note "${note.title}".`;
+        }
+
+        await createActivity({
+          note: String(note._id),
+          user: String(user._id),
+          action: actionType,
+          message,
+        });
       }
 
       const populatedNote = await populateNote(Note.findById(note._id));
@@ -425,6 +521,14 @@ export async function DELETE(request: NextRequest) {
         return jsonError("Hanya owner yang boleh menghapus note", 403);
       }
 
+      await createActivity({
+        note: String(note._id),
+        user: String(user._id),
+        action: "delete",
+        message: `${user.name} menghapus note "${note.title}".`,
+      });
+
+      await ActivityLog.deleteMany({ note: note._id });
       await note.deleteOne();
 
       return NextResponse.json({
@@ -451,11 +555,26 @@ export async function DELETE(request: NextRequest) {
         return jsonError("Hanya owner yang boleh menghapus collaborator", 403);
       }
 
+      const targetUser = await User.findById(userId).select(
+        "_id name email avatar",
+      );
+
+      if (!targetUser) {
+        return jsonError("User tidak ditemukan", 404);
+      }
+
       note.collaborators = note.collaborators.filter((item: any) => {
         return String(item.user) !== String(userId) || item.role === "owner";
       });
 
       await note.save();
+
+      await createActivity({
+        note: String(note._id),
+        user: String(user._id),
+        action: "remove_collaborator",
+        message: `${user.name} menghapus akses ${targetUser.name} dari note "${note.title}".`,
+      });
 
       const populatedNote = await populateNote(Note.findById(note._id));
 
