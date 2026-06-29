@@ -15,12 +15,22 @@ const api = axios.create({
   baseURL: "/api",
 });
 
+const TOKEN_KEY = "token";
+const USER_KEY = "user";
+
+const clearSession = () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(USER_KEY);
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+};
+
 api.interceptors.request.use((config) => {
   if (typeof window === "undefined") {
     return config;
   }
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem(TOKEN_KEY);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -33,8 +43,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (typeof window !== "undefined" && error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      clearSession();
     }
 
     return Promise.reject(error);
