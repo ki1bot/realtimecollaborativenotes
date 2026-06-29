@@ -10,8 +10,8 @@ import {
   ShieldCheck,
   UsersRound,
 } from "lucide-react";
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
 import CollaboratorModal from "@/app/components/CollaboratorModal";
 import Loading from "@/app/components/Loading";
@@ -22,8 +22,11 @@ import { notesApi } from "@/app/lib/api";
 import type { ActivityLog, Note, Role, UserSummary } from "@/app/types";
 
 export default function NoteEditorPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id") || "";
+  const mode = searchParams.get("mode") || "";
+  const isCreateMode = mode === "create";
   const { user, loading: authLoading } = useAuth();
   const [note, setNote] = useState<Note | null>(null);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -31,11 +34,16 @@ export default function NoteEditorPage() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState("");
+  const [savedMessage, setSavedMessage] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const role = useMemo<Role | null>(() => {
+    if (isCreateMode && user) {
+      return "owner";
+    }
+
     if (!note || !user) {
       return null;
     }
@@ -48,10 +56,10 @@ export default function NoteEditorPage() {
       note.collaborators.find((item) => item.user._id === user._id)?.role ||
       null
     );
-  }, [note, user]);
+  }, [isCreateMode, note, user]);
 
   const canEdit = role === "owner" || role === "editor";
-  const canShare = role === "owner";
+  const canShare = role === "owner" && !isCreateMode && Boolean(note);
 
   const onlineUsers = useMemo<UserSummary[]>(() => {
     if (!user) {
@@ -72,10 +80,33 @@ export default function NoteEditorPage() {
     return content.trim().split(/\s+/).filter(Boolean).length;
   }, [content]);
 
-  const roleLabel = role || "no-access";
+  const roleLabel = isCreateMode ? "owner" : role || "no-access";
+
+  const updatedAtLabel = note?.updatedAt
+    ? new Date(note.updatedAt).toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "Belum disimpan";
 
   useEffect(() => {
-    if (authLoading || !user || !id) {
+    if (authLoading || !user) {
+      return;
+    }
+
+    if (isCreateMode) {
+      setNote(null);
+      setTitle("");
+      setContent("");
+      setActivities([]);
+      setDirty(false);
+      setError("");
+      setSavedMessage("");
+      setLoading(false);
+      return;
+    }
+
+    if (!id) {
       return;
     }
 
@@ -84,6 +115,7 @@ export default function NoteEditorPage() {
     const loadNote = async () => {
       setLoading(true);
       setError("");
+      setSavedMessage("");
 
       try {
         const [noteData, activityData] = await Promise.all([
@@ -96,6 +128,7 @@ export default function NoteEditorPage() {
           setTitle(noteData.title);
           setContent(noteData.content);
           setActivities(activityData);
+          setDirty(false);
         }
       } catch {
         if (active) {
@@ -115,10 +148,10 @@ export default function NoteEditorPage() {
     return () => {
       active = false;
     };
-  }, [authLoading, user, id]);
+  }, [authLoading, user, id, isCreateMode]);
 
   useEffect(() => {
-    if (authLoading || !user || !id) {
+    if (authLoading || !user || !id || isCreateMode) {
       return;
     }
 
@@ -144,82 +177,73 @@ export default function NoteEditorPage() {
       active = false;
       window.clearInterval(interval);
     };
-  }, [authLoading, user, id]);
+  }, [authLoading, user, id, isCreateMode]);
 
-  useEffect(() => {
-    return () => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current);
-      }
-    };
-  }, []);
-
-  const refreshActivities = async () => {
+  const refreshActivities = async (targetId: string) => {
     try {
-      const activityData = await notesApi.getActivities(id);
+      const activityData = await notesApi.getActivities(targetId);
       setActivities(activityData);
     } catch {
       setError("Note tersimpan, tetapi activity gagal diperbarui.");
     }
   };
 
-  const scheduleSave = (nextTitle: string, nextContent: string) => {
-    if (!id || !canEdit) {
-      return;
-    }
-
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current);
-    }
-
-    setSaving(true);
-    setError("");
-
-    saveTimer.current = setTimeout(async () => {
-      try {
-        const updatedNote = await notesApi.updateNote(id, {
-          title: nextTitle,
-          content: nextContent,
-        });
-
-        setNote(updatedNote);
-        await refreshActivities();
-      } catch {
-        setError("Gagal menyimpan note.");
-      } finally {
-        setSaving(false);
-      }
-    }, 900);
-  };
-
   const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setTitle(value);
-    scheduleSave(value, content);
+    setTitle(event.target.value);
+    setDirty(true);
+    setSavedMessage("");
   };
 
   const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = event.target.value;
-    setContent(value);
-    scheduleSave(title, value);
+    setContent(event.target.value);
+    setDirty(true);
+    setSavedMessage("");
   };
 
   const saveManually = async () => {
-    if (!id || !canEdit) {
+    if (!canEdit) {
       return;
     }
 
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current);
-    }
+    const nextTitle = title.trim() || "Untitled Note";
 
     setSaving(true);
     setError("");
+    setSavedMessage("");
 
     try {
-      const updatedNote = await notesApi.updateNote(id, { title, content });
+      if (isCreateMode) {
+        const createdNote = await notesApi.createNote({
+          title: nextTitle,
+          content,
+        });
+
+        setNote(createdNote);
+        setTitle(createdNote.title);
+        setContent(createdNote.content);
+        setDirty(false);
+        setSavedMessage("Note berhasil disimpan.");
+        await refreshActivities(createdNote._id);
+        router.replace(`/?view=note&id=${createdNote._id}`);
+        return;
+      }
+
+      if (!id) {
+        setError("ID note tidak ditemukan.");
+        return;
+      }
+
+      const updatedNote = await notesApi.updateNote(id, {
+        title: nextTitle,
+        content,
+      });
+
       setNote(updatedNote);
-      await refreshActivities();
+      setTitle(updatedNote.title);
+      setContent(updatedNote.content);
+      setDirty(false);
+      setSavedMessage("Note berhasil disimpan.");
+      await refreshActivities(id);
     } catch {
       setError("Gagal menyimpan note.");
     } finally {
@@ -232,7 +256,7 @@ export default function NoteEditorPage() {
       <MainLayout>
         {loading ? (
           <Loading />
-        ) : !id ? (
+        ) : !isCreateMode && !id ? (
           <div className="rounded-[1.5rem] border border-red-300 bg-red-50 p-5 text-red-600 shadow-lg dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 sm:rounded-[2rem] sm:p-8">
             <h3 className="text-xl font-black tracking-tight sm:text-2xl">
               ID note tidak ditemukan
@@ -242,7 +266,7 @@ export default function NoteEditorPage() {
               Halaman ini harus dibuka dengan format /?view=note&id=ID_NOTE.
             </p>
           </div>
-        ) : error && !note ? (
+        ) : error && !note && !isCreateMode ? (
           <div className="rounded-[1.5rem] border border-red-300 bg-red-50 p-5 text-red-600 shadow-lg dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 sm:rounded-[2rem] sm:p-8">
             <h3 className="text-xl font-black tracking-tight sm:text-2xl">
               Gagal membuka note
@@ -250,7 +274,7 @@ export default function NoteEditorPage() {
 
             <p className="mt-3 text-sm leading-7 sm:text-base">{error}</p>
           </div>
-        ) : !note ? (
+        ) : !note && !isCreateMode ? (
           <div className="rounded-[1.5rem] border border-white/70 bg-white/80 p-5 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 sm:rounded-[2rem] sm:p-8">
             <h3 className="text-xl font-black tracking-tight text-slate-950 dark:text-slate-50 sm:text-2xl">
               Note tidak ditemukan
@@ -293,7 +317,11 @@ export default function NoteEditorPage() {
                           disabled={saving}
                         >
                           <Save size={17} />
-                          {saving ? "Menyimpan..." : "Simpan"}
+                          {saving
+                            ? "Menyimpan..."
+                            : isCreateMode
+                              ? "Simpan Note"
+                              : "Simpan"}
                         </button>
                       )}
 
@@ -334,12 +362,7 @@ export default function NoteEditorPage() {
 
                     <span className="inline-flex min-w-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-2 dark:bg-slate-800">
                       <Clock3 size={14} className="shrink-0" />
-                      <span className="truncate">
-                        {new Date(note.updatedAt).toLocaleString("id-ID", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </span>
+                      <span className="truncate">{updatedAtLabel}</span>
                     </span>
                   </div>
 
@@ -358,9 +381,14 @@ export default function NoteEditorPage() {
                   <div className="mt-4 min-h-6 text-sm font-semibold text-slate-500 dark:text-slate-400">
                     {saving
                       ? "Menyimpan perubahan..."
-                      : canEdit
-                        ? "Perubahan disimpan."
-                        : "Mode viewer. Kamu tidak bisa mengedit note ini."}
+                      : savedMessage ||
+                        (canEdit
+                          ? dirty
+                            ? "Ada perubahan yang belum disimpan."
+                            : isCreateMode
+                              ? "Note belum tersimpan. Klik Simpan untuk menyimpan."
+                              : "Tidak ada perubahan baru."
+                          : "Mode viewer. Kamu tidak bisa mengedit note ini.")}
                   </div>
                 </div>
               </section>
@@ -370,7 +398,7 @@ export default function NoteEditorPage() {
               </aside>
             </div>
 
-            {showShareModal && (
+            {showShareModal && note && (
               <CollaboratorModal
                 note={note}
                 onClose={() => setShowShareModal(false)}

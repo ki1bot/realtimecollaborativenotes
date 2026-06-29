@@ -27,7 +27,6 @@ export default function DashboardPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -91,27 +90,13 @@ export default function DashboardPage() {
 
   const sharedNotes = notes.length - ownedNotes;
 
-  const createNote = async () => {
+  const createNote = () => {
     if (!user) {
       router.push("/?view=login");
       return;
     }
 
-    setCreating(true);
-    setError("");
-
-    try {
-      const note = await notesApi.createNote({
-        title: "Untitled Note",
-        content: "",
-      });
-
-      router.push(`/?view=note&id=${note._id}`);
-    } catch {
-      setError("Gagal membuat note baru.");
-    } finally {
-      setCreating(false);
-    }
+    router.push("/?view=note&mode=create");
   };
 
   const deleteNote = async (id: string) => {
@@ -318,12 +303,12 @@ export default function DashboardPage() {
 
                 <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
                   <button
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/30 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    type="button"
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/30 transition hover:-translate-y-0.5 sm:w-auto"
                     onClick={createNote}
-                    disabled={creating}
                   >
                     <Plus size={18} />
-                    {creating ? "Membuat..." : "Buat Note Baru"}
+                    Buat Note Baru
                   </button>
 
                   <div className="relative w-full sm:max-w-sm">
